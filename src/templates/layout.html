@@ -19,14 +19,14 @@
     ></script>
 
     <link href="/static/styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
 
     <title>Learn!T: {%block title%}{%endblock%}</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Learn!T</a>
+        <div class="navbar-brand" href="#">Learn!T</div>
         <button
           class="navbar-toggler"
           type="button"
@@ -43,26 +43,33 @@
           aria-labelledby="offcanvasNavbarLabel"
         >
           <div class="offcanvas-body">
-            <ul
-              class="navbar-nav navbar-dark bg-dark  flex-grow-1 pe-3"
-            >
+            <ul class="navbar-nav navbar-dark bg-dark flex-grow-1 pe-3">
               <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
+                {%if active[0]%}
+                <a class="nav-link active" aria-current="page" href="/">Home</a>
+                {%else%}
+                <a class="nav-link" href="/">Home</a>
+                {%endif%}
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">Learning paths</a>
+                {%if active[1]%}
+                <a class="nav-link active" href="/learning-paths" aria-current="page">Learning paths</a>
+                {%else%}
+                <a class="nav-link" href="/learning-paths">Learning paths</a>
+                {%endif%}
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#">About</a>
+                <a class="nav-link" href="/about">About</a>
               </li>
-              <li class="nav-item">
-                <form>
-                    <input type="text">
-                    
-                </form>
-              </li>
+              
             </ul>
+            <form class="d-flex">
+              <a class="btn btn-outline-success me-2 mt-1" type="button" href="/login">
+                Login
+              </a>
+            </form>
           </div>
+          
         </div>
       </div>
     </nav>

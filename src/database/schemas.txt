@@ -1,0 +1,15 @@
+CREATE TABLE users (                    
+    id INTEGER PRIMARY KEY AUTOINCREMENT,  
+    login TEXT NOT NULL UNIQUE,
+    passwordhash TEXT NOT NULL UNIQUE
+    );
+
+CREATE TABLE books ()
+
+CREATE TABLE videos ()
+
+CREATE TABLE courses ()
+
+CREATE TABLE lpaths ()
+
+go postgresql
