@@ -3,3 +3,10 @@
     text-decoration: none;
     padding: 0.5rem;
 }
+
+.error{
+    color: red;
+    font-size: small;
+    text-decoration: none;
+    padding: 0.5rem;
+}

@@ -5,5 +5,58 @@ Register
 {% endblock %}
 
 {% block main %}
-<p>Hello world</p>
+<h3>Registration<hr/></h3>
+<form action="/register" method="post">
+  <div class="mb-3">
+    <input
+      autocomplete="on"
+      autofocus
+      class="form-control mx-auto w-auto"
+      id="username"
+      name="username"
+      placeholder="Username"
+      type="text"
+      maxlength="10"
+    />
+    <p class="font-weight-light error">{{userError}}</p>
+  </div>
+  <div class="mb-3">
+    <input
+      class="form-control mx-auto w-auto"
+      id="password"
+      name="password"
+      placeholder="Password"
+      type="password"
+      maxlength="15"
+    />
+    <p class="font-weight-light error">{{passwordError}}</p>
+  </div>
+  <div class="mb-3">
+    <input
+      class="form-control mx-auto w-auto"
+      id="confirmPassword"
+      name="confirmPassword"
+      placeholder="Confirm Password"
+      type="password"
+      maxlength="15"
+    />
+    <p class="font-weight-light error">{{confirmPasswordError}}</p>
+  </div>
+  <div class="mb-3">
+    <input
+      class="form-control mx-auto w-auto"
+      id="email"
+      name="email"
+      placeholder="email@address.com"
+      type="email"
+      maxlength="15"
+    />
+    <p class="font-weight-light error">{{confirmPasswordError}}</p>
+  </div>
+  <button class="btn btn-success" type="submit">Register</button>
+</form>
+
+
+<p class="font-weight-light registertip">{{error}}</p>
+<script src="../static/js/register.js"></script>
 {% endblock %}

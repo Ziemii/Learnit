@@ -1,13 +1,24 @@
-from flask import Flask, render_template, request, session, redirect
+from tkinter import SE
+from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
 import os
 from dotenv import load_dotenv
 import sqlite3
+from werkzeug.security import check_password_hash, generate_password_hash
+import secrets
+from helpers import login_required
+
 
 load_dotenv()
 
-app = Flask(__name__)
 
+app = Flask(__name__)
+app.secret_key = secrets.token_urlsafe(16) # to change
+
+
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # print(os.getenv('BABA'))
 # conn = sqlite3.connect('database/learn!t.db')
@@ -26,6 +37,7 @@ def learningPaths():
     return render_template("learning-paths.html", active=active)
 
 @app.route('/about', methods=['GET', 'POST'])
+@login_required
 def about():
     if(request.method=='GET'):
         active = [0,0,1]
@@ -33,21 +45,37 @@ def about():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    active = [0,0,0]
+    session.clear()
     if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        userId = None
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
-            user = cur.execute("SELECT login FROM users WHERE login = ?", (request.form.get('username'),)).fetchall()
-            print(user)
+            user = cur.execute("SELECT passwordhash, id FROM users WHERE login = ?", (username,)).fetchall()
             if not user:
-               return redirect('/')
-            return redirect('/')
+                return render_template('login.html', active=active, userError = 'Username not found.')
+            if not check_password_hash(user[0][0], password):
+                return render_template('login.html', active=active, passwordError = 'Incorrect password.')
+            userId=user[0][1]
+            
+        session['user_id'] = userId
         
+        return redirect("/")
+
     else:
-        active = [0,0,0]
+        
+        
         return render_template("login.html", active=active)
 
 
-
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    session.clear()
+    return redirect('/')
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # hash = generate_password_hash(
+    #         password, method='pbkdf2:sha256', salt_length=8)
     return render_template("register.html", active=active)

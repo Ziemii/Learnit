@@ -24,7 +24,7 @@
     <title>Learn!T: {%block title%}{%endblock%}</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
       <div class="container-fluid">
         <a class="navbar-brand nav-item" href="/">Learn!T</a>
         <button
@@ -43,6 +43,40 @@
           aria-labelledby="offcanvasNavbarLabel"
         >
           <div class="offcanvas-body">
+             {%if session['user_id']%}
+             <ul class="navbar-nav navbar-dark bg-dark flex-grow-1 pe-3">
+              <li class="nav-item">
+                {%if active[0]%}
+                <a class="nav-link active" aria-current="page" href="/">Home</a>
+                {%else%}
+                <a class="nav-link" href="/">Home</a>
+                {%endif%}
+              </li>
+              <li class="nav-item">
+                {%if active[1]%}
+                <a class="nav-link active" href="/learning-paths" aria-current="page">Learning paths</a>
+                {%else%}
+                <a class="nav-link" href="/learning-paths">Learning paths</a>
+                {%endif%}
+              </li>
+              <li class="nav-item">
+                {%if active[2]%}
+                <a class="nav-link active" href="/about" aria-current="page">About</a>
+                {%else%}
+                <a class="nav-link" href="/about">About</a>
+                {%endif%}
+              </li>
+              
+            </ul>
+            <form class="d-flex">
+              <a class="btn btn-outline-success me-2 mt-1" type="button" href="/settings">
+                Account
+              </a>
+              <a class="btn btn-outline-success me-2 mt-1" type="button" href="/logout">
+                Log out
+              </a>
+            </form>
+              {%else%}
             <ul class="navbar-nav navbar-dark bg-dark flex-grow-1 pe-3">
               <li class="nav-item">
                 {%if active[0]%}
@@ -72,13 +106,15 @@
                 Login
               </a>
             </form>
+            {%endif%}
           </div>
           
         </div>
       </div>
     </nav>
 
-    <main class="container-fluid py-5 text-center">
+    <main class="container-fluid py-3 text-center">
+      
       {% block main %}{% endblock %}
     </main>
   </body>

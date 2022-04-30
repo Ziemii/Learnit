@@ -1,9 +1,10 @@
 {% extends "layout.html" %} {% block title %} Login {% endblock %} {% block main
 %}
+<h3>Welcome back<hr/></h3>
 <form action="/login" method="post">
   <div class="mb-3">
     <input
-      autocomplete="off"
+      autocomplete="on"
       autofocus
       class="form-control mx-auto w-auto"
       id="username"
@@ -12,6 +13,7 @@
       type="text"
       maxlength="10"
     />
+    <p class="font-weight-light error">{{userError}}</p>
   </div>
   <div class="mb-3">
     <input
@@ -22,8 +24,12 @@
       type="password"
       maxlength="15"
     />
+    <p class="font-weight-light error">{{passwordError}}</p>
   </div>
   <button class="btn btn-success" type="submit">Log In</button>
 </form>
 <p class="font-weight-light registertip">Not member yet? <a href="/register">Click here</a> to create account.</p>
+
+<p class="font-weight-light registertip">{{error}}</p>
+
 {% endblock %}
