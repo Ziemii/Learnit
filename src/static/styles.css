@@ -4,9 +4,32 @@
     padding: 0.5rem;
 }
 
+.register{
+    font-size: small;
+    text-decoration: none;
+}
+
 .error{
     color: red;
     font-size: small;
     text-decoration: none;
     padding: 0.5rem;
+}
+
+.form-check .form-check-input{
+    float: initial;
+    margin-left: -6.5em;
+}
+
+.mail
+{
+    margin-left: -12em;
+}
+
+.password {
+    margin-left: -4em;
+}
+
+.username {
+    margin-left: -3.8em;
 }

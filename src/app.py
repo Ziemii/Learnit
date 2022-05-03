@@ -78,4 +78,11 @@ def logout():
 def register():
     # hash = generate_password_hash(
     #         password, method='pbkdf2:sha256', salt_length=8)
-    return render_template("register.html", active=active)
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email')
+        
+        return render_template("register.html", active=active)
+    else:
+        return render_template("register.html", active=active)
