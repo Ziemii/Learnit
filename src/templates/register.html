@@ -20,6 +20,9 @@ Register
       maxlength="10"
       minlength="2"
     />
+    {%if userError%}
+    {{userError}}
+    {%endif%}
     
     
     
@@ -57,6 +60,9 @@ Register
       placeholder="email@address.com"
       type="email"
     />
+    {%if emailError%}
+    {{emailError}}
+    {%endif%}
     
   </div>
   <div class="form-check mb-3">
