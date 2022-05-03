@@ -102,3 +102,8 @@ def register():
         return render_template("register.html", active=active)
     else:
         return render_template("register.html", active=active)
+
+
+@app.route('/privacy', methods=['GET'])
+def terms():
+    return render_template('privacy.html', active=active)

@@ -84,6 +84,7 @@ document
     }
   });
 
+// Check if every form field is valid 
 function checkForm() {
   if (
     formStatus.reduce(
