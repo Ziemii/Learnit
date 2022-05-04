@@ -2,8 +2,15 @@ CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,  
     login TEXT NOT NULL UNIQUE,
     passwordhash TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE
+    email TEXT NOT NULL UNIQUE,
+    isActive INTEGER NOT NULL
     );
+CREATE TABLE verifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    verification TEXT NOT NULL,
+    userId INTEGER NOT NULL,
+    FOREIGN KEY(userId) REFERENCES users(id)
+);
 
 CREATE TABLE books ()
 
@@ -14,3 +21,11 @@ CREATE TABLE courses ()
 CREATE TABLE lpaths ()
 
 go postgresql
+
+///Test queries
+
+/Make user active
+UPDATE users 
+SET isActive = 1 
+FROM (SELECT userId from verifications WHERE verification = 'pbkdf2:sha256:260000$XMphTVl1$bf58fd34d91f852f2d86f86ae20fa5c9194dfb99a00f1e9c384dc6070c6b9013') as verifications
+WHERE users.id = verifications.userId;   

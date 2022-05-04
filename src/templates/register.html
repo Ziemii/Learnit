@@ -22,7 +22,7 @@ Register
       minlength="2"
     />
     {%if userError%}
-    {{userError}}
+    <div class="error">{{userError}}</div>
     {%endif%}
     
     
@@ -62,7 +62,7 @@ Register
       type="email"
     />
     {%if emailError%}
-    {{emailError}}
+    <div class="error">{{emailError}}</div>
     {%endif%}
     
   </div>

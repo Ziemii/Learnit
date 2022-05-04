@@ -8,6 +8,7 @@ import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from helpers import login_required
+import mail_service
 
 
 load_dotenv()
@@ -54,13 +55,14 @@ def login():
         userId = None
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
-            user = cur.execute("SELECT passwordhash, id FROM users WHERE login = ?", (username,)).fetchall()
+            user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
             if not user:
                 return render_template('login.html', active=active, userError = 'Username not found.')
             if not check_password_hash(user[0][0], password):
                 return render_template('login.html', active=active, passwordError = 'Incorrect password.')
+            if user[0][2] != 1:
+                return render_template('login.html', active=active, passwordError = 'Account inactive, check your email.')
             userId=user[0][1]
-            
         session['user_id'] = userId
         
         return redirect("/")
@@ -75,6 +77,7 @@ def login():
 def logout():
     session.clear()
     return redirect('/')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -84,16 +87,21 @@ def register():
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
             user = cur.execute("SELECT * FROM users WHERE login = ?", (username,)).fetchall()
-            email = cur.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchall()
-            if not email and not user:
+            dbemail = cur.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchall()
+            if not dbemail and not user:
                 hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
-                cur.execute("INSERT INTO users (login, passwordhash, email) VALUES (?,?,?)",(str(username),str(hash),str(email)))
-                return render_template('register.html', active=active)
-            if not email:
+                cur.execute("INSERT INTO users (login, passwordhash, email, isActive) VALUES (?,?,?,?)",(str(username),str(hash),str(email), 0))
+                userId = cur.execute("SELECT id FROM users WHERE login = ?", (username,)).fetchall()[0][0]
+                verification = str(generate_password_hash(username, method='pbkdf2:sha256', salt_length=8))
+                # veritest = verification.lstrip("pbkdf2:sha256:260000")
+                cur.execute("INSERT INTO verifications (verification, userId) VALUES (?,?)",(verification,userId))
+                mail_service.SendConfirmation(email, verification.lstrip("pbkdf2:sha256:260000"))
+                return render_template('register_success.html', active=active)
+            if not dbemail:
                 return render_template('register.html', active=active, userError = 'Username already in use')
             else:
                 return render_template('register.html', active=active, emailError = 'E-mail already in use')
-            eemail=email[0][0]
+            
             
         
         
@@ -107,3 +115,11 @@ def register():
 @app.route('/privacy', methods=['GET'])
 def terms():
     return render_template('privacy.html', active=active)
+
+@app.route('/confirmation', methods=['GET'])
+def confirmation():
+    hashParam = request.args.get('pass')
+    with sqlite3.connect(_DB) as conn:
+        cur = conn.cursor();
+        cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;",(str('pbkdf2:sha256:260000'+hashParam),))
+    return render_template('login.html', active=active, accActive='Account activated.')
