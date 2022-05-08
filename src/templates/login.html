@@ -5,7 +5,7 @@
     Welcome back
     <hr />
   </h3>
-  <form action="/login" method="post">
+  <form class="mb-2" action="/login" method="post">
     <div class="mb-3">
       <input
         autocomplete="on"
@@ -17,7 +17,10 @@
         type="text"
         maxlength="10"
       />
-      <p class="font-weight-light error">{{userError}}</p>
+      {%if userError != null%}
+    <p class="font-weight-light error">{{userError}}</p>
+    {%endif%}
+      <!-- <p class="font-weight-light error"></p> -->
     </div>
     <div class="mb-3">
       <input
@@ -28,11 +31,19 @@
         type="password"
         maxlength="15"
       />
-      <p class="font-weight-light error">{{passwordError}}</p>
+      {%if passwordError != null%}
+    <p class="font-weight-light error">{{passwordError}}</p>
+    {%endif%}
+      <!-- <p class="font-weight-light error"></p> -->
     </div>
     <button class="btn btn-success" type="submit">Log In</button>
+    {%if accActive != null%}
     <p class="font-weight-light error">{{accActive}}</p>
+    {%endif%}
   </form>
+  <p class="font-weight-light registertip">
+    <a href="/recover">Forgot login or password?</a>
+  </p>
   <p class="font-weight-light registertip">
     Not member yet? <a href="/register">Click here</a> to create account.
   </p>

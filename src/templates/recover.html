@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Recover credentials
+{% endblock %}
+
+{% block main %}
+<div class="text-center">
+    <h3>
+     Account recovery
+      <hr />
+    </h3>
+</div>
+{%if success != null%}
+<h4>Request accepted, check your mail.</h4>
+{%else%}
+<form class="mb-2" action="/recover" method="post">
+  <div class="mb-3">
+    <input
+      class="form-control mx-auto w-auto"
+      id="credential"
+      name="credential"
+      placeholder="Chosen credential"
+      type="text"
+      maxlength="15"
+    />
+  <button class="btn btn-success" type="submit">Recover</button>
+</form>
+{%endif%}
+{% endblock %}

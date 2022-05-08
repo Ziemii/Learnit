@@ -1,4 +1,5 @@
-from tkinter import SE
+# from crypt import methods
+# from tkinter import SE
 from xml.etree.ElementTree import tostring
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
@@ -39,7 +40,6 @@ def learningPaths():
     return render_template("learning-paths.html", active=active)
 
 @app.route('/about', methods=['GET', 'POST'])
-@login_required
 def about():
     if(request.method=='GET'):
         active = [0,0,1]
@@ -123,3 +123,57 @@ def confirmation():
         cur = conn.cursor();
         cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;",(str('pbkdf2:sha256:260000'+hashParam),))
     return render_template('login.html', active=active, accActive='Account activated.')
+
+@app.route('/new', methods=['GET', 'POST'])
+@login_required
+def newPath():
+    active = [0,0,0]
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        body = request.form.get('body')
+        userId = None
+        print(f"Title: {title}")
+        print(f"body: {body}")
+        # with sqlite3.connect(_DB) as conn:
+        #     cur = conn.cursor();
+        #     user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
+        #     if not user:
+        #         return render_template('login.html', active=active, userError = 'Username not found.')
+        #     if not check_password_hash(user[0][0], password):
+        #         return render_template('login.html', active=active, passwordError = 'Incorrect password.')
+        #     if user[0][2] != 1:
+        #         return render_template('login.html', active=active, passwordError = 'Account inactive, check your email.')
+        #     userId=user[0][1]
+        # session['user_id'] = userId
+        
+        return redirect("/new")
+
+    else:
+        
+        
+        return render_template("new_path.html", active=active)
+
+@app.route('/recover', methods=['GET', 'POST'])
+def recover():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        body = request.form.get('body')
+        success = None
+        print(f"Title: {title}")
+        print(f"body: {body}")
+        # with sqlite3.connect(_DB) as conn:
+        #     cur = conn.cursor();
+        #     user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
+        #     if not user:
+        #         return render_template('login.html', active=active, userError = 'Username not found.')
+        #     if not check_password_hash(user[0][0], password):
+        #         return render_template('login.html', active=active, passwordError = 'Incorrect password.')
+        #     if user[0][2] != 1:
+        #         return render_template('login.html', active=active, passwordError = 'Account inactive, check your email.')
+        #     userId=user[0][1]
+        # session['user_id'] = userId
+        
+        return render_template("recover.html",active=active, success=success)
+    else:
+        return render_template("recover.html", active=active)
