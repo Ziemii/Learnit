@@ -1,0 +1,20 @@
+{% extends "layout.html" %} {% block title %} jinja title<!-- title -->
+{% endblock %} {% block main %}
+<h3 class="text-center">
+  Biszkopcik
+  <hr />
+</h3>
+<div class="container-md">
+  <div class="d-lg-flex flex-column">
+    <div class="p-2">
+      <div class="d-flex flex-row">
+        <div class="p-2"><a href='#'>tag 1</a></div>
+        <div class="p-2">tag 2</div>
+        <div class="p-2">tag 3</div>
+      </div>
+    </div>
+    <div class="p-2">Rating <i class="fa-solid fa-star" style="color: rgb(230, 196, 9);"></i></div>
+    <div class="p-2">body</div>
+  </div>
+</div>
+{% endblock %}

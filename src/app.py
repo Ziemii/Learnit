@@ -1,5 +1,6 @@
 # from crypt import methods
 # from tkinter import SE
+#from crypt import methods
 from xml.etree.ElementTree import tostring
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
@@ -132,20 +133,16 @@ def newPath():
     if request.method == 'POST':
         title = request.form.get('title')
         body = request.form.get('body')
-        userId = None
+        tags = request.form.get('tags')
+        userId = session['user_id']
         print(f"Title: {title}")
         print(f"body: {body}")
-        # with sqlite3.connect(_DB) as conn:
-        #     cur = conn.cursor();
-        #     user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
-        #     if not user:
-        #         return render_template('login.html', active=active, userError = 'Username not found.')
-        #     if not check_password_hash(user[0][0], password):
-        #         return render_template('login.html', active=active, passwordError = 'Incorrect password.')
-        #     if user[0][2] != 1:
-        #         return render_template('login.html', active=active, passwordError = 'Account inactive, check your email.')
-        #     userId=user[0][1]
-        # session['user_id'] = userId
+        with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor();
+            user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
+            if not user:
+          
+         
         
         return redirect("/new")
 
@@ -177,3 +174,16 @@ def recover():
         return render_template("recover.html",active=active, success=success)
     else:
         return render_template("recover.html", active=active)
+
+@app.route('/path', methods=['GET'])
+def path():
+    id = request.args.get('id')
+    lpath = None
+    with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor();
+            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (id,)).fetchall()
+            if not lpath:
+                return redirect('/')
+            print(lpath)
+            
+    return render_template("path.html", active=active)

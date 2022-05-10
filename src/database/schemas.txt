@@ -19,6 +19,7 @@ CREATE TABLE lpaths (
     body TEXT,
     rating REAL DEFAULT 0.0,
     isActive INTEGER DEFAULT 0,
+    userId INTEGER,
     FOREIGN KEY(userId) REFERENCES users(id)
 )
 
