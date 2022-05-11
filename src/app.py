@@ -140,7 +140,7 @@ def newPath():
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
             user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
-            if not user:
+            # if not user:
           
          
         
