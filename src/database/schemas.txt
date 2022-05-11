@@ -40,3 +40,7 @@ UPDATE users
 SET isActive = 1 
 FROM (SELECT userId from verifications WHERE verification = 'pbkdf2:sha256:260000$XMphTVl1$bf58fd34d91f852f2d86f86ae20fa5c9194dfb99a00f1e9c384dc6070c6b9013') as verifications
 WHERE users.id = verifications.userId;   
+
+/Mock lpath
+INSERT INTO lpaths (title, tags, body, userId)
+VALUES( 'titlepath1','baba, gaga, lulu','IAM THE BODYYYYY', 1);

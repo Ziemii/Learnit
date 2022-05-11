@@ -1,30 +1,50 @@
 {% extends "layout.html" %} {% block title %} Learning paths {% endblock %} {%
 block main %}
 <div class="text-center">
-    <h3 style="margin-bottom: 0rem;">
-     Learning paths
-      <hr class="mb-0" />
-    </h3>
+  <h3 style="margin-bottom: 0rem">
+    Learning paths
+    <hr class="mb-0" />
+  </h3>
 </div>
-<div class="d-flex align-items-center">
-    Haba
-    <div class="d-flex justify-content-end w-100"><a href="/new"><button class="btn btn-success m-2" type="submit" id="">Add+</button></a></div>
+<div class="d-flex justify-content-around align-items-center">
+  <form class="d-flex w-50 me-4">
+    <input
+      class="form-control me-2"
+      type="search"
+      placeholder="Search"
+      aria-label="Search"
+    />
+    <button class="btn btn-outline-success" type="submit">Search</button>
+  </form>
+  <div>
+    <span class="font-weight-light registertip">Sort by:</span>
+    <button class="btn btn-outline-success" type="">A</button>
+    <button class="btn btn-outline-success" type="">
+      <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i>
+    </button>
+  </div>
+  <div class="d-flex justify-content-end">
+    <a href="/new"
+      ><button class="btn btn-success m-2" type="submit" id="">Add+</button></a
+    >
+  </div>
 </div>
-<hr class="m-0 mb-1"/>
-<div class="d-flex justify-content-center p-2">
-  <div class="card border-dark mb-3" style="width: 18rem">
-    <div class="card-body">
-      <h5 class="card-title" id="title">Title</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Tags: </h6>
-      <p class="card-text">
-        Some quick example text to build on the card title and make up the bulk
-        of the card's content.
-      </p>
-      <p>Rating:</p>
+<hr class="m-0 mb-1" />
+<div class="container-lg">
+  <div class="row row-cols-4 justify-content-center p-2">
+    {%if paths %} {%for path in paths%}
+    <div class="card border-dark m-3 p-2" style="width: 18rem">
+      <div class="card-body">
+        <h5 class="card-title" id="title">Title {{path[1]}}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Tags: {{path[2]}}</h6>
+        <p class="card-text">{{path[3]}}</p>
+        <p>Rating:{{path[4]}}</p>
 
-      <a href="#" class="card-link">Card link</a>
-      <a href="#" class="card-link">Another link</a>
+        <a href="#" class="card-link">Card link</a>
+        <a href="#" class="card-link">Another link</a>
+      </div>
     </div>
+    {%endfor%} {%endif%}
   </div>
 </div>
 {% endblock %}

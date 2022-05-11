@@ -35,10 +35,45 @@ def index():
     active = [1,0,0]
     return render_template("index.html", active=active)
 
-@app.route('/learning-paths', methods=['GET', 'POST'])
+@app.route('/learning-paths', methods=['GET'])
 def learningPaths():
     active = [0,1,0]
-    return render_template("learning-paths.html", active=active)
+    
+    last = request.args.get('last')
+    sortBy = request.args.get('sortBy')#rating, alpha
+    firstvalue = None
+    limit = 10
+    with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor();
+            
+            
+            if(sortBy and last):
+                match sortBy:
+                    case 'rating':
+                        lpaths = cur.execute("SELECT * FROM lpaths WHERE rating > ? ORDER BY rating LIMIT ?;", (last,limit)).fetchall()
+                    case 'alpha':
+                        lpaths = cur.execute("SELECT * FROM lpaths WHERE title > ? ORDER BY title LIMIT ?;", (last,limit)).fetchall()
+            if(sortBy):
+                match sortBy:
+                    case 'rating':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating LIMIT ?;", (limit)).fetchall()
+                    case 'alpha':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title LIMIT ?;", (limit)).fetchall()
+            if(last):
+                lpaths = cur.execute("SELECT * FROM lpaths WHERE id < ? ORDER BY id DESC LIMIT ?;", (last,limit)).fetchall()
+            
+
+            lpaths = cur.execute("SELECT * FROM lpaths ORDER BY id DESC LIMIT ?;", (limit,)).fetchall()
+            
+            
+            if not lpaths:
+                active = [0,0,0]
+                return render_template('errorpage.html', active=active)
+    
+   
+    # session['page'] = 0
+
+    return render_template("learning-paths.html", active=active, paths=lpaths)
 
 @app.route('/about', methods=['GET', 'POST'])
 def about():
@@ -137,9 +172,10 @@ def newPath():
         userId = session['user_id']
         print(f"Title: {title}")
         print(f"body: {body}")
+        print(f"Tags: {tags}")
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
-            user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
+            # user = cur.execute("SELECT * FROM lpaths WHERE id = ?", (,)).fetchall()
             # if not user:
           
          
