@@ -39,28 +39,57 @@ def index():
 def learningPaths():
     active = [0,1,0]
     
-    last = request.args.get('last')
+    page = request.args.get('page')
+    
+    if not page:
+        page = 1
+
     sortBy = request.args.get('sortBy')#rating, alpha
-    firstvalue = None
-    limit = 10
+    
+    limit = 8
     with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
+            count = int(cur.execute("SELECT COUNT(*) FROM lpaths;").fetchall()[0][0])
+            pages = 0
+            if((count % 8)>0):
+                pages = int(count/8)+1;
+            else:
+                pages = int(count/8);
             
             
-            if(sortBy and last):
+            if(sortBy and page):
+                page=int(page)
                 match sortBy:
                     case 'rating':
-                        lpaths = cur.execute("SELECT * FROM lpaths WHERE rating > ? ORDER BY rating LIMIT ?;", (last,limit)).fetchall()
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating LIMIT ? OFFSET ?;", (limit,(page-1)*8)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
                     case 'alpha':
-                        lpaths = cur.execute("SELECT * FROM lpaths WHERE title > ? ORDER BY title LIMIT ?;", (last,limit)).fetchall()
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title LIMIT ? OFFSET ?;", (limit,(page-1)*8)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
+                    case '!rating':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating DESC LIMIT ? OFFSET ?;", (limit,(page-1)*8)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
+                    case '!alpha':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title DESC LIMIT ? OFFSET ?;", (limit,(page-1)*8)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
             if(sortBy):
                 match sortBy:
                     case 'rating':
-                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating LIMIT ?;", (limit)).fetchall()
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating LIMIT ?;", (limit,)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
                     case 'alpha':
-                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title LIMIT ?;", (limit)).fetchall()
-            if(last):
-                lpaths = cur.execute("SELECT * FROM lpaths WHERE id < ? ORDER BY id DESC LIMIT ?;", (last,limit)).fetchall()
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title LIMIT ?;", (limit,)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
+                    case '!rating':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY rating DESC LIMIT ?;", (limit,)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
+                    case '!alpha':
+                        lpaths = cur.execute("SELECT * FROM lpaths ORDER BY title DESC LIMIT ?;", (limit,)).fetchall()
+                        return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages, sortBy=sortBy)
+            if(page):
+                page=int(page)
+                lpaths = cur.execute("SELECT * FROM lpaths ORDER BY id DESC LIMIT ? OFFSET ?;", (limit,(page-1)*8)).fetchall()
+                return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages)
             
 
             lpaths = cur.execute("SELECT * FROM lpaths ORDER BY id DESC LIMIT ?;", (limit,)).fetchall()
@@ -71,9 +100,9 @@ def learningPaths():
                 return render_template('errorpage.html', active=active)
     
    
-    # session['page'] = 0
 
-    return render_template("learning-paths.html", active=active, paths=lpaths)
+
+    return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages)
 
 @app.route('/about', methods=['GET', 'POST'])
 def about():

@@ -36,5 +36,18 @@ FROM (SELECT userId from verifications WHERE verification = 'pbkdf2:sha256:26000
 WHERE users.id = verifications.userId;   
 
 /Mock lpath
-INSERT INTO lpaths (title, tags, body, userId)
-VALUES( 'titlepath1','baba, gaga, lulu','IAM THE BODYYYYY', 1);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath1user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath2user2','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 2);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath3user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath3user2','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 2);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath4user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
+INSERT INTO lpaths (title, tags, excerpt, body, userId)
+VALUES( 'titlepath4user3','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 3);
+
+INSERT INTO lpaths (title, tags, excerpt, body, rating, userId)
+VALUES( 'titlepath4user3','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY',2 , 3);
