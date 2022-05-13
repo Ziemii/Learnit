@@ -24,6 +24,11 @@ CREATE TABLE lpaths (
     FOREIGN KEY(userId) REFERENCES users(id)
 )
 
+CREATE TABLE tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    json TEXT
+)
 
 go postgresql
 

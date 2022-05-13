@@ -37,10 +37,10 @@ block main %}
     {%if paths %} {%for path in paths%}
     <div class="card border-dark m-3 p-2" style="width: 18rem">
       <div class="card-body">
-        <h5 class="card-title" id="title">Title {{path[1]}}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Tags: {{path[2]}}</h6>
+        <h5 class="card-title" id="title">{{path[1]}}</h5>
+        <h6 class="card-subtitle mb-2 text-muted" id="tags" >Tags: <span name="tags">{{path[2]}}</span> </h6>
         <p class="card-text">{{path[3]}}</p>
-        <p>Rating:{{path[5]}}</p>
+        <p>Rating: {{path[5]}} <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i></p>
 
         <a href="#" class="card-link">Card link</a>
         <a href="#" class="card-link">Another link</a>
@@ -51,12 +51,12 @@ block main %}
   <div class="d-flex justify-content-around align-items-center">
     <nav aria-label="Page navigation example" class="align-items-center">
       <ul class="pagination">
-        <li class="page-item">
+        <!-- <li class="page-item">
           <a class="page-link" href="#" aria-label="Previous">
             <span aria-hidden="true">&laquo;</span>
             <span class="sr-only">Previous</span>
           </a>
-        </li>
+        </li> -->
         {%if sortBy %} {%for i in range(pages)%}
         <li class="page-item">
           <a
@@ -65,19 +65,24 @@ block main %}
             >{{i+1}}</a
           >
         </li>
-        {%endfor%} {%else%} {%for i in range(pages)%}
+        {%endfor%}
+        {%elif tag %}
+        <!-- <li class="page-item">
+          <a class="page-link" href="/learning-paths"></a>
+        </li> -->
+        {%else%} {%for i in range(pages)%}
         <li class="page-item">
           <a class="page-link" href="/learning-paths?page={{i+1}}">{{i+1}}</a>
         </li>
         {%endfor%} {%endif%}
         <!-- <li class="page-item"><a class="page-link" href="#">2</a></li>
           <li class="page-item"><a class="page-link" href="#">3</a></li> -->
-        <li class="page-item">
+        <!-- <li class="page-item">
           <a class="page-link" href="#" aria-label="Next">
             <span aria-hidden="true">&raquo;</span>
             <span class="sr-only">Next</span>
           </a>
-        </li>
+        </li> -->
       </ul>
     </nav>
   </div>

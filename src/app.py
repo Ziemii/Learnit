@@ -38,7 +38,7 @@ def index():
 @app.route('/learning-paths', methods=['GET'])
 def learningPaths():
     active = [0,1,0]
-    
+    tag = request.args.get('tag')
     page = request.args.get('page')
     
     if not page:
@@ -56,6 +56,10 @@ def learningPaths():
             else:
                 pages = int(count/8);
             
+            if(tag):
+                
+                lpaths = cur.execute("SELECT * FROM lpaths WHERE tags LIKE ?;", ("%"+tag+"%",)).fetchall()
+                return render_template("learning-paths.html", active=active, paths=lpaths,pages=0, tag=tag)
             
             if(sortBy and page):
                 page=int(page)
@@ -196,16 +200,19 @@ def newPath():
     
     if request.method == 'POST':
         title = request.form.get('title')
-        body = request.form.get('body')
         tags = request.form.get('tags')
+        excerpt = request.form.get('excerpt')
+        body = request.form.get('body')
+        filteredTags = ''.join((filter(lambda x: x not in [' ', ',', '!', '?'], tags)))
         userId = session['user_id']
         print(f"Title: {title}")
         print(f"body: {body}")
         print(f"Tags: {tags}")
+        print(f"filtered tags: {filteredTags}")
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
-            # user = cur.execute("SELECT * FROM lpaths WHERE id = ?", (,)).fetchall()
-            # if not user:
+            cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",(title, filteredTags, excerpt, body, userId))
+            
           
          
         
