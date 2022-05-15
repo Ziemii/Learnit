@@ -10,7 +10,7 @@ cardsTags.forEach(rawTag => {
             var hyperlink = document.createElement("a");
             hyperlink.href = '/learning-paths?tag=' + element;
             var button = document.createElement("button");
-            button.setAttribute('class', 'btn btn-primary btn-sm m-1');
+            button.setAttribute('class', 'btn btn-outline-primary btn-sm m-1');
             var inside = document.createTextNode('#'+element);
             button.appendChild(inside);
             hyperlink.appendChild(button);
@@ -51,5 +51,11 @@ function byAlpha(){
         window.location.href = '/learning-paths?sortBy=!alpha';
     }
     
+
+}
+
+function Search(){
+    console.log(document.getElementById('search').innerHTML);
+    // window.location.href = '/learning-paths?search=' + document.getElementById('search').innerText;
 
 }

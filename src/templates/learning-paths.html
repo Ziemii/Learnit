@@ -7,15 +7,19 @@ block main %}
   </h3>
 </div>
 <div class="d-flex justify-content-around align-items-center">
-  <form class="d-flex w-50 me-4">
+  <!-- <form class="d-flex w-50 me-4"> -->
+  <div class="form-group justify-content-around">
     <input
-      class="form-control me-2"
-      type="search"
+      class="form-control"
+      type="text"
       placeholder="Search"
       aria-label="Search"
+      id="search"
     />
-    <button class="btn btn-outline-success" type="submit">Search</button>
-  </form>
+    <button class="btn btn-outline-success" type="submit" onclick="">Search</button>
+  </div>  
+
+  <!-- </form> -->
   <div>
     <span class="font-weight-light registertip">Sort by:</span>
     <button class="btn btn-outline-success" type="" onclick="byAlpha()">
@@ -32,18 +36,24 @@ block main %}
   </div>
 </div>
 <hr class="m-0 mb-1" />
-<div class="container-lg">
-  <div class="row row-cols-4 justify-content-center p-2">
+<div class="container-lg justify-content-center">
+  <div class="row p-2">
     {%if paths %} {%for path in paths%}
-    <div class="card border-dark m-3 p-2" style="width: 18rem">
-      <div class="card-body">
-        <h5 class="card-title" id="title">{{path[1]}}</h5>
-        <h6 class="card-subtitle mb-2 text-muted" id="tags" >Tags: <span name="tags">{{path[2]}}</span> </h6>
-        <p class="card-text">{{path[3]}}</p>
-        <p>Rating: {{path[5]}} <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i></p>
+    <div class="col-md-4 container-fluid justify-content-center">
+      <div class="card border-secondary m-3 w-100" style="width: 18rem">
+        <div class="card-body">
+          <h5 class="card-title" id="title">{{path[1]}}</h5>
+          <h6 class="card-subtitle mb-2 text-muted" id="tags">
+            Tags: <span name="tags">{{path[2]}}</span>
+          </h6>
+          <p class="card-text fst-italic">{{path[3]}}</p>
+          <p>
+            Rating: {{path[5]}}
+            <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i>
+          </p>
 
-        <a href="#" class="card-link">Card link</a>
-        <a href="#" class="card-link">Another link</a>
+          <a href="path?id={{path[0]}}" class="card-link"><button class='btn btn-primary'>Open path</button></a>
+        </div>
       </div>
     </div>
     {%endfor%} {%endif%}
@@ -65,8 +75,7 @@ block main %}
             >{{i+1}}</a
           >
         </li>
-        {%endfor%}
-        {%elif tag %}
+        {%endfor%} {%elif tag %}
         <!-- <li class="page-item">
           <a class="page-link" href="/learning-paths"></a>
         </li> -->
