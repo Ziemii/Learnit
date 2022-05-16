@@ -24,17 +24,16 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# print(os.getenv('BABA'))
-# conn = sqlite3.connect('database/learn!t.db')
-# cur = conn.cursor();
 _DB = os.getenv('DB')
 active = [0,0,0]
 
+#Landing page
 @app.route('/', methods=['GET', 'POST'])
 def index():
     active = [1,0,0]
     return render_template("index.html", active=active)
 
+#
 @app.route('/learning-paths', methods=['GET'])
 def learningPaths():
     active = [0,1,0]
@@ -63,13 +62,13 @@ def learningPaths():
                 
                 lpaths = cur.execute("SELECT * FROM lpaths WHERE tags LIKE ?;", ("%"+tag+"%",)).fetchall()
                 return render_template("learning-paths.html", active=active, paths=lpaths,pages=0, tag=tag)
-            if(search and page):
-                lpaths = cur.execute("SELECT * FROM lpaths WHERE title LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?;", ("%"+search+"%",limit,(page-1)*limit)).fetchall()
-                return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages)
+            # if(search and page):
+            #     lpaths = cur.execute("SELECT * FROM lpaths WHERE title LIKE ? ORDER BY id DESC LIMIT ? OFFSET ?;", ("%"+search+"%",limit,(page-1)*limit)).fetchall()
+            #     return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages)
 
             if(search):
-                lpaths = cur.execute("SELECT * FROM lpaths WHERE title LIKE ? ORDER BY id DESC LIMIT ?;", ("%"+search+"%",limit,)).fetchall()
-                return render_template("learning-paths.html", active=active, paths=lpaths,pages=pages)
+                lpaths = cur.execute("SELECT * FROM lpaths WHERE title LIKE ? ORDER BY id DESC LIMIT ?;", ("%"+search+"%",limit,)).fetchall()    
+                return render_template("learning-paths.html", active=active, paths=lpaths,tag='x')
 
             if(sortBy and page):
                 
@@ -151,7 +150,6 @@ def login():
         
         return render_template("login.html", active=active)
 
-
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.clear()
@@ -189,7 +187,6 @@ def register():
         return render_template("register.html", active=active)
     else:
         return render_template("register.html", active=active)
-
 
 @app.route('/privacy', methods=['GET'])
 def terms():

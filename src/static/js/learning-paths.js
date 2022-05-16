@@ -55,7 +55,37 @@ function byAlpha(){
 }
 
 function Search(){
-    console.log(document.getElementById('search').innerHTML);
-    // window.location.href = '/learning-paths?search=' + document.getElementById('search').innerText;
+    searchWord = document.getElementById('search').value;
+    // url = new URL(searchWord,'/learning-paths?search=');
+    console.log(document.getElementById('search').value);
+    window.location.href = '/learning-paths?search=' + searchWord;
 
 }
+
+const url = new URL(window.location);
+const sort = url.searchParams.get('sortBy');
+switch(sort){
+    case 'alpha':
+        var byAlphaBtn = document.getElementById('byAlpha').classList;
+        byAlphaBtn.add('btn-success');
+        byAlphaBtn.remove('btn-outline-success');
+        byAlphaBtn.remove('btn-danger');
+        break;
+    case '!alpha':
+        var byAlphaBtn = document.getElementById('byAlpha').classList;
+        byAlphaBtn.add('btn-danger');
+        byAlphaBtn.remove('btn-outline-success');
+        break;
+    case 'rating':
+        var byRatingBtn = document.getElementById('byRating').classList;
+        byRatingBtn.add('btn-success');
+        byRatingBtn.remove('btn-outline-success');
+        byRatingBtn.remove('btn-danger');
+        break;
+    case '!rating':
+        var byRatingBtn = document.getElementById('byRating').classList;
+        byRatingBtn.add('btn-danger');
+        byRatingBtn.remove('btn-outline-success');
+        break;
+}
+    
