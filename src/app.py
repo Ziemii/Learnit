@@ -287,19 +287,22 @@ def path():
 @login_required
 def rate():
     pathId = request.form.get('pathId')
-    voter = request.form.get('userId')
+    userId = request.form.get('userId')
     with sqlite3.connect(_DB) as conn:
             cur = conn.cursor()
             voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
             rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
 
             cur.execute("UPDATE lpaths SET rating = ? WHERE id = ?", (rating+1,pathId))
+            cur.execute("UPDATE lpaths SET voted = ? WHERE id = ?", (voted+","+userId,pathId))
             if(userId != None):
-                voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (id,)).fetchall()[0][0]
+                voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
                 print(voted)
                 if(userId in voted):
                     userId = 'voted'
-            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (id,)).fetchall()[0]
+            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
                 return redirect('/')
             # print(lpath)
+            return "OK"
+    

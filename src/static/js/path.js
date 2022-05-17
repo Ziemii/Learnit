@@ -31,6 +31,7 @@ function rate(){
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.send(params);
+    location.reload();
 }
 // var ele = document.getElementById('pathData');
 // console.log($(ele).data());
