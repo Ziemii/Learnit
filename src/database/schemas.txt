@@ -20,9 +20,24 @@ CREATE TABLE lpaths (
     body TEXT,
     rating INTEGER DEFAULT 0,
     isActive INTEGER DEFAULT 0,
+    voted TEXT DEFAULT "",
     userId INTEGER,
     FOREIGN KEY(userId) REFERENCES users(id)
 )
+
+CREATE TABLE backup (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    tags TEXT,
+    excerpt TEXT,
+    body TEXT,
+    rating INTEGER DEFAULT 0,
+    isActive INTEGER DEFAULT 0,
+    voted TEXT DEFAULT "",
+    userId INTEGER,
+    FOREIGN KEY(userId) REFERENCES users(id)
+)
+INSERT INTO Destination SELECT * FROM Source;
 
 CREATE TABLE tags (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

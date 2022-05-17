@@ -1,6 +1,7 @@
 # from crypt import methods
 # from tkinter import SE
 #from crypt import methods
+
 from xml.etree.ElementTree import tostring
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
@@ -11,6 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from helpers import login_required
 import mail_service
+import json
 
 
 load_dotenv()
@@ -51,7 +53,11 @@ def learningPaths():
     limit = 6 
     with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
+           
             count = int(cur.execute("SELECT COUNT(*) FROM lpaths;").fetchall()[0][0])
+            
+
+            
             pages = 0
             if((count % limit)>0):
                 pages = int(count/limit)+1;
@@ -256,13 +262,44 @@ def recover():
 
 @app.route('/path', methods=['GET'])
 def path():
-    id = request.args.get('id')
+    pathId = request.args.get('id')
     lpath = None
+    userId = None
+    # if(session['user_id']):
+    userId = session.get('user_id')
+    print(f"userId {userId}")
     with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
-            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (id,)).fetchall()
+            if(userId != None):
+                voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+                print(voted)
+                if(str(userId) in voted):
+                    userId = 'voted'
+            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
                 return redirect('/')
-            print(lpath)
-            
-    return render_template("path.html", active=active)
+            # print(lpath)
+    
+    return render_template("path.html", active=active, lpath=lpath, userId=userId)
+
+
+@app.route('/rate', methods=['POST'])
+@login_required
+def rate():
+    pathId = request.form.get('pathId')
+    voter = request.form.get('userId')
+    with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor()
+            voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+            rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+
+            cur.execute("UPDATE lpaths SET rating = ? WHERE id = ?", (rating+1,pathId))
+            if(userId != None):
+                voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (id,)).fetchall()[0][0]
+                print(voted)
+                if(userId in voted):
+                    userId = 'voted'
+            lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (id,)).fetchall()[0]
+            if not lpath:
+                return redirect('/')
+            # print(lpath)

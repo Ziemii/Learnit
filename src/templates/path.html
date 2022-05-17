@@ -1,20 +1,36 @@
 {% extends "layout.html" %} {% block title %} jinja title<!-- title -->
 {% endblock %} {% block main %}
 <h3 class="text-center">
-  Biszkopcik
+  {{lpath[1]}}
   <hr />
 </h3>
 <div class="container-md">
   <div class="d-lg-flex flex-column">
     <div class="p-2">
-      <div class="d-flex flex-row">
-        <div class="p-2"><a href='#'>tag 1</a></div>
-        <div class="p-2">tag 2</div>
-        <div class="p-2">tag 3</div>
-      </div>
+      <h6 class="card-subtitle mb-2 text-muted" id="tags">
+        Tags: <span name="tags">{{lpath[2]}}</span>
+      </h6>
     </div>
-    <div class="p-2">Rating <i class="fa-solid fa-star" style="color: rgb(230, 196, 9);"></i></div>
-    <div class="p-2">body</div>
+    <div class="p-2">Rating: {{lpath[5]}} <i class="fa-solid fa-star" style="color: rgb(230, 196, 9);"></i>
+    {%if userId == 'voted'%}
+      <span class="d-inline-block" data-toggle="tooltip" title="Already voted">
+        <button class="btn btn-success btn-sm mw-1" data-placement="right" style="pointer-events: none;" type="button" disabled><i class="fa-solid fa-thumbs-up"></i></button>
+      </span>
+    {%elif userId%}
+      <button class="btn btn-success btn-sm mw-1" onclick="rate()"><i class="fa-solid fa-thumbs-up"></i></button>
+    
+      
+    {%else%}
+    <span class="d-inline-block" data-toggle="tooltip" title="Log in to rate">
+      <button class="btn btn-success btn-sm mw-1" data-placement="right" style="pointer-events: none;" type="button" disabled><i class="fa-solid fa-thumbs-up"></i></button>
+    </span>
+    {%endif%}
+    
+    </div>
+    <div class="p-2 fst-italic">{{lpath[3]}}</div>
+    <div class="p-3 cardBody">{{lpath[4]|safe}}</div>
   </div>
 </div>
+<div id="pathData" data-userId="{{userId}}" data-pathId="{{lpath[0]}}"/>
+<script src="../static/js/path.js"></script>
 {% endblock %}
