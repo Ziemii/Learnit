@@ -267,13 +267,15 @@ def path():
     userId = None
     # if(session['user_id']):
     userId = session.get('user_id')
-    print(f"userId {userId}")
+    # print(f"userId {userId}")
     with sqlite3.connect(_DB) as conn:
             cur = conn.cursor();
             if(userId != None):
                 voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
-                print(voted)
-                if(str(userId) in voted):
+                # print(f"voted {voted}")
+                votedList = voted.split(',')
+                # print(f"votedList {votedList}")
+                if(str(userId) in votedList):
                     userId = 'voted'
             lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
@@ -306,3 +308,7 @@ def rate():
             # print(lpath)
             return "OK"
     
+@app.route('/account', methods=['GET','POST'])
+@login_required
+def account():
+    return render_template('account.html', active=active)

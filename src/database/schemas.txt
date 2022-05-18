@@ -1,10 +1,12 @@
-CREATE TABLE users (                    
+CREATE TABLE usersbp (                    
     id INTEGER PRIMARY KEY AUTOINCREMENT,  
     login TEXT NOT NULL UNIQUE,
     passwordhash TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
-    isActive INTEGER NOT NULL
+    isActive INTEGER NOT NULL,
+    voted TEXT DEFAULT ""
     );
+    INSERT INTO usersbp SELECT * FROM users;
 CREATE TABLE verifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     verification TEXT NOT NULL,
@@ -37,6 +39,14 @@ CREATE TABLE backup (
     userId INTEGER,
     FOREIGN KEY(userId) REFERENCES users(id)
 )
+CREATE TABLE users (                    
+    id INTEGER PRIMARY KEY AUTOINCREMENT,  
+    login TEXT NOT NULL UNIQUE,
+    passwordhash TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    isActive INTEGER NOT NULL,
+    voted TEXT DEFAULT ""
+    );
 INSERT INTO Destination SELECT * FROM Source;
 
 CREATE TABLE tags (
