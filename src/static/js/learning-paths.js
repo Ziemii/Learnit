@@ -21,12 +21,12 @@ cardsTags.forEach(rawTag => {
 
 
 function byRating(){
-    var ratingOrder = localStorage.getItem('ratingOrder');
+    var ratingOrder = sessionStorage.getItem('ratingOrder');
     if(ratingOrder){
-        localStorage.setItem('ratingOrder', ratingOrder*-1);
+        sessionStorage.setItem('ratingOrder', ratingOrder*-1);
     }
     else {
-        localStorage.setItem('ratingOrder', 1);
+        sessionStorage.setItem('ratingOrder', 1);
     }
     if(ratingOrder > 0){
         window.location.href = '/learning-paths?sortBy=rating';
@@ -37,12 +37,12 @@ function byRating(){
 }
 
 function byAlpha(){
-    var alphaOrder = localStorage.getItem('alphaOrder');
+    var alphaOrder = sessionStorage.getItem('alphaOrder');
     if(alphaOrder){
-        localStorage.setItem('alphaOrder', alphaOrder*-1);
+        sessionStorage.setItem('alphaOrder', alphaOrder*-1);
     }
     else {
-        localStorage.setItem('alphaOrder', 1);
+        sessionStorage.setItem('alphaOrder', 1);
     }
     if(alphaOrder > 0){
         window.location.href = '/learning-paths?sortBy=alpha';

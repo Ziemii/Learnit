@@ -332,7 +332,7 @@ def bookmark():
                 # rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
                 print(f"bookmarks before 1st split {bookmarks}")
                 bookmarks = bookmarks.split(',')
-            # if(pathId )
+           
             
             
               
@@ -354,6 +354,9 @@ def bookmark():
                     print(f"bookmarks after join {bookmarks}")
                     cur.execute("UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks,userId))
             
+                return Response("BOOKMARKING DONE", status=201, mimetype='application/json')
+            return Response("BOOKMARKING FAILED", status=400, mimetype='application/json')
+
                 
             # print(lpath)
             return "OK"
