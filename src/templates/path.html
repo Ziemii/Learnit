@@ -12,20 +12,34 @@
       </h6>
     </div>
     <div class="p-2">Rating: {{lpath[5]}} <i class="fa-solid fa-star" style="color: rgb(230, 196, 9);"></i>
-    {%if userId == 'voted'%}
+    {%if voted == 'voted'%}
       <span class="d-inline-block" data-toggle="tooltip" title="Already voted">
         <button class="btn btn-success btn-sm mw-1" data-placement="right" style="pointer-events: none;" type="button" disabled><i class="fa-solid fa-thumbs-up"></i></button>
       </span>
     {%elif userId%}
+    <span class="d-inline-block" data-toggle="tooltip" title="Endorse">
       <button class="btn btn-success btn-sm mw-1" onclick="rate()"><i class="fa-solid fa-thumbs-up"></i></button>
-    
+     </span>
       
     {%else%}
     <span class="d-inline-block" data-toggle="tooltip" title="Log in to rate">
       <button class="btn btn-success btn-sm mw-1" data-placement="right" style="pointer-events: none;" type="button" disabled><i class="fa-solid fa-thumbs-up"></i></button>
     </span>
-    {%endif%}
     
+    {%endif%}
+    {%if userId and bookmark == 1 %}
+      <span class="d-inline-block" data-toggle="tooltip" title="Remove bookmark">
+        <button class="btn btn-danger btn-sm mw-1" data-placement="right"  type="button" onclick="bookmark()"><i class="fa-solid fa-bookmark"></i></button>
+      </span>
+    {%elif userId and bookmark == 0 %}
+      <span class="d-inline-block" data-toggle="tooltip" title="Bookmark">
+        <button class="btn btn-warning btn-sm mw-1" data-placement="right" type="button" onclick="bookmark()"><i class="fa-solid fa-bookmark"></i></button>
+      </span>  
+    {%else%}
+    <span class="d-inline-block" data-toggle="tooltip" title="Log in to bookmark">
+      <button class="btn btn-warning btn-sm mw-1" data-placement="right" style="pointer-events: none;" type="button" disabled><i class="fa-solid fa-bookmark"></i></button>
+    </span>
+    {%endif%}
     </div>
     <div class="p-2 fst-italic">{{lpath[3]}}</div>
     <div class="p-3 cardBody">{{lpath[4]|safe}}</div>

@@ -45,7 +45,8 @@ CREATE TABLE users (
     passwordhash TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     isActive INTEGER NOT NULL,
-    voted TEXT DEFAULT ""
+    voted TEXT DEFAULT "",
+    bookmarks TEXT DEFAULT "0"
     );
 INSERT INTO Destination SELECT * FROM Source;
 

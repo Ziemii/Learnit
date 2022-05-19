@@ -31,9 +31,22 @@ function rate(){
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.send(params);
-    location.reload();
+    return location.reload();
 }
 // var ele = document.getElementById('pathData');
 // console.log($(ele).data());
 // var pathData = $('#pathData').data();
 // console.log("userId="+$('#pathData').data('userid')+"&pathId="+$('#pathData').data('pathid'))
+
+function bookmark(){
+    var url = "/bookmark";
+    var params = "userId="+$('#pathData').data('userid')+"&pathId="+$('#pathData').data('pathid');
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    xhr.send(params)
+    return location.reload();
+}

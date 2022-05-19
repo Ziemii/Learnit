@@ -13,6 +13,7 @@ import secrets
 from helpers import login_required
 import mail_service
 import json
+from flask import Response
 
 
 load_dotenv()
@@ -264,7 +265,9 @@ def recover():
 def path():
     pathId = request.args.get('id')
     lpath = None
+    bookmark = 0
     userId = None
+    voted = None
     # if(session['user_id']):
     userId = session.get('user_id')
     # print(f"userId {userId}")
@@ -272,17 +275,22 @@ def path():
             cur = conn.cursor();
             if(userId != None):
                 voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+                bookmarks = cur.execute("SELECT bookmarks FROM users WHERE id = ?", (userId,)).fetchall()[0][0]
                 # print(f"voted {voted}")
+                bookmarksList = bookmarks.split(',')
+                print(f"bookmarksList: {bookmarksList}")
                 votedList = voted.split(',')
                 # print(f"votedList {votedList}")
                 if(str(userId) in votedList):
-                    userId = 'voted'
+                    voted = 'voted'
+                if(str(pathId) in bookmarksList):
+                    bookmark = 1
             lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
                 return redirect('/')
             # print(lpath)
     
-    return render_template("path.html", active=active, lpath=lpath, userId=userId)
+    return render_template("path.html", active=active, lpath=lpath, userId=userId, voted=voted, bookmark=bookmark)
 
 
 @app.route('/rate', methods=['POST'])
@@ -291,23 +299,66 @@ def rate():
     pathId = request.form.get('pathId')
     userId = request.form.get('userId')
     with sqlite3.connect(_DB) as conn:
+        if(userId != None and pathId != None):
             cur = conn.cursor()
             voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
             rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
 
             cur.execute("UPDATE lpaths SET rating = ? WHERE id = ?", (rating+1,pathId))
             cur.execute("UPDATE lpaths SET voted = ? WHERE id = ?", (voted+","+userId,pathId))
-            if(userId != None):
-                voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
-                print(voted)
-                if(userId in voted):
-                    userId = 'voted'
+        
+            voted = cur.execute("SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+            print(voted)
+            if(userId in voted):
+                userId = 'voted'
             lpath = cur.execute("SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
                 return redirect('/')
             # print(lpath)
+            return Response("RATED", status=201, mimetype='application/json')
+        return Response("NOT RATED", status=400, mimetype='application/json')
+
+@app.route('/bookmark', methods=['POST'])
+@login_required
+def bookmark():
+    pathId = request.form.get('pathId')
+    userId = request.form.get('userId')
+    # print(f"userId {userId}")
+    # print(f"pathId {pathId}")
+    with sqlite3.connect(_DB) as conn:
+            if(userId != None and pathId != None):
+                cur = conn.cursor()
+                bookmarks = cur.execute("SELECT bookmarks FROM users WHERE id = ?", (1,)).fetchall()[0][0]
+                # rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
+                print(f"bookmarks before 1st split {bookmarks}")
+                bookmarks = bookmarks.split(',')
+            # if(pathId )
+            
+            
+              
+                if(pathId in bookmarks):
+                    print('342')
+                    print(f"bookmarks before remove {bookmarks}")
+                    bookmarks.remove("8")
+                    print(f"bookmarks after remove {bookmarks}")
+                    bookmarks = ",".join(bookmarks)
+                    print(f"newbookmarks after remove {bookmarks}")
+                    cur.execute("UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks,userId))
+                    
+                else:
+                    print('347')
+                    print(f"pathId {pathId}")
+                    bookmarks += pathId
+                    print(f"newBookmarks after add {bookmarks}")
+                    bookmarks = ",".join(bookmarks)
+                    print(f"bookmarks after join {bookmarks}")
+                    cur.execute("UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks,userId))
+            
+                
+            # print(lpath)
             return "OK"
-    
+
+
 @app.route('/account', methods=['GET','POST'])
 @login_required
 def account():
