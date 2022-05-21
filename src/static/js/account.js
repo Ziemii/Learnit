@@ -42,8 +42,8 @@ function removeSubmission(pathId){
 }
 function deleteAccount(userId){
     
-        const purl = "./deleteAccount";
-        fetch(purl, {
+        const url = "./deleteAccount";
+        fetch(url, {
             method: 'post',
             body: JSON.stringify(userId),
             mode: 'cors',
