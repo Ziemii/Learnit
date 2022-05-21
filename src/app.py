@@ -427,3 +427,29 @@ def deleteAccount():
             cur.execute("DELETE FROM lpaths WHERE userId=? ;", (int(userId),))
             return Response("DELETE DONE", status=201, mimetype='application/json')
         return Response("DELETE FAILED", status=400, mimetype='application/json')
+
+@app.route('/controlpanel', methods=['GET', 'POST'])
+def controlPanel():
+    active = [0, 0, 0]
+    # session.clear()
+    session['admin_id'] = None
+    if request.method == 'POST':
+        password = request.form.get('password')
+        adminId = None
+        with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor()
+            password = cur.execute(
+                "SELECT password FROM admin WHERE id = 1").fetchall()[0][0]
+            print(f"password {password}")
+            if not password:
+                return redirect('/')
+            if password != password:
+                return redirect('/')
+            adminId = 1
+        session['admin_id'] = adminId
+
+        return redirect("/controlpanel")
+    if request.method == 'GET' and session['admin_id'] != None:
+        return render_template("controlpanel.html", active=active, admin=1)
+    else:
+        return render_template("controlpanel.html", active=active)

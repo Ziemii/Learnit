@@ -27,6 +27,11 @@ CREATE TABLE lpaths (
     FOREIGN KEY(userId) REFERENCES users(id)
 )
 
+CREATE TABLE admin (
+    id INTEGER PRIMARY KEY,
+    password TEXT
+)
+
 CREATE TABLE backup (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,

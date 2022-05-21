@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Admin Control Panel
+{% endblock %}
+
+{% block main %}
+<div class="text-center">
+    <form class="mb-2" action="/controlpanel" method="post">
+        <div class="mb-3">
+          <input
+            class="form-control mx-auto w-auto"
+            id="password"
+            name="password"
+            placeholder="Password"
+            type="password"
+            maxlength="15"
+            autocomplete="off"
+          />
+          {%if passwordError != null%}
+          <p class="font-weight-light error">{{passwordError}}</p>
+          {%endif%}
+          
+        </div>
+        <button class="btn btn-success" type="submit">Enter</button>
+        
+      </form>
+</div>
+{% endblock %}
