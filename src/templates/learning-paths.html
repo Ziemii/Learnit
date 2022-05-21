@@ -35,8 +35,8 @@ block main %}
 <div class="container-lg justify-content-center">
   <div class="row p-2">
     {%if paths %} {%for path in paths%}
-    <div class="col-md-4 container-fluid justify-content-center">
-      <div class="card border-secondary m-3 w-100" style="width: 18rem">
+    <div class="col-md-4 container-fluid justify-content-center" >
+      <div class="card border-secondary w-100 m-1" name='card' onclick="window.location='./path?id={{path[0]}}';" style="width: 18rem">
         <div class="card-body">
           <h5 class="card-title" id="title">{{path[1]}}</h5>
           <h6 class="card-subtitle mb-2 text-muted" id="tags">
@@ -48,7 +48,7 @@ block main %}
             <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i>
           </p>
 
-          <a href="path?id={{path[0]}}" class="card-link"><button class='btn btn-primary'>Open path</button></a>
+          <!-- <a href="path?id={{path[0]}}" class="card-link"><button class='btn btn-primary'>Open path</button></a> -->
         </div>
       </div>
     </div>

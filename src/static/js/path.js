@@ -1,3 +1,10 @@
+var wait = (ms) => {
+    const start = Date.now();
+    let now = start;
+    while (now - start < ms) {
+      now = Date.now();
+    }
+}
 let cardsTags = document.getElementsByName('tags');
 
 cardsTags.forEach(rawTag => {
@@ -31,6 +38,7 @@ function rate(){
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.send(params);
+    wait(200);
     return location.reload();
 }
 // var ele = document.getElementById('pathData');
@@ -48,5 +56,6 @@ function bookmark(){
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.send(params)
+    wait(200);
     return location.reload();
 }

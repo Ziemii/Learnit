@@ -10,60 +10,91 @@ Account
     <hr />
   </h3>
 <div class="container-fluid w-75">
-<h4 class="">Username</h4>
+<h4 class="">{{user[1]}}</h4>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="bookmarks-tab" data-bs-toggle="tab" data-bs-target="#bookmarks" type="button" role="tab" aria-controls="bookmarks" aria-selected="true">Bookmarks</button>
+      <button class="nav-link active" id="bookmarks-tab" data-bs-toggle="tab" data-bs-target="#bookmarks" type="button" role="tab" aria-controls="bookmarks" aria-selected="true"><i class="fa-solid fa-bookmark"></i> Bookmarks</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="submissions-tab" data-bs-toggle="tab" data-bs-target="#submissions" type="button" role="tab" aria-controls="submissions" aria-selected="false">Submissions</button>
+      <button class="nav-link" id="submissions-tab" data-bs-toggle="tab" data-bs-target="#submissions" type="button" role="tab" aria-controls="submissions" aria-selected="false"><i class="fa-solid fa-file-pen"></i> Submissions</button>
     </li>
     <li class="nav-item" role="presentation">
-        <button class="nav-link" id="Account-tab" data-bs-toggle="tab" data-bs-target="#Account" type="button" role="tab" aria-controls="Account" aria-selected="false">My Account</button>
+        <button class="nav-link" id="Account-tab" data-bs-toggle="tab" data-bs-target="#Account" type="button" role="tab" aria-controls="Account" aria-selected="false"><i class="fa-solid fa-user-ninja"></i> My Account</button>
       </li>
   </ul>
   <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade" id="bookmarks" role="tabpanel" aria-labelledby="bookmarks-tab">
+    <div class="tab-pane fade show active" id="bookmarks" role="tabpanel" aria-labelledby="bookmarks-tab">
+      {%if bookmarks%}
       <table class="table table-hover">
         <thead>
             <tr>
-              <th scope="col">#</th>
+              
               <th scope="col">Title</th>
               <th scope="col">Rating</th>
               <th scope="col">Excerpt</th>
               <th scope="col"> </th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-              <td><button class="btn btn-danger btn-sm"></button></td>
+          
+           <tbody>
+            {%for path in bookmarks%}
+            <tr >
+              <td style="cursor: pointer;" onclick="window.location='./path?id={{path[0][0]}}';">{{path[0][1]}}</td>
+              <td>{{path[0][5]}}</td>
+              <td>{{path[0][3]}}</td>
+              <td><button class="btn btn-danger btn-sm mw-1" data-placement="right"  type="button" onclick="removeBookmark('{{path[0][0]}}')"><i class="fa-solid fa-xmark"></i></button></td>
             </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td colspan="2">Larry the Bird</td>
-              <td>Thornton</td>
-              <td>@twitter</td>
-            </tr>
-          </tbody>
-    </table>
+            {%endfor%}
+            </tbody>
+         
+          </table>
+      {%else%}
+          <h4 class="text-center pt-5">No bookmarks saved</h4>
+      {%endif%}
 
     </div>
-    <div class="tab-pane fade" id="Account" role="tabpanel" aria-labelledby="Account-tab">acc</div>
-    <div class="tab-pane fade show active" id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
+    <div class="tab-pane fade" id="Account" role="tabpanel" aria-labelledby="Account-tab">
+      <div class="container justify-content-center m-5">
+        <hr>
+        <div class="container">
+          <p class="fw-bold">Account:</p>
+          <p>Login: <code>{{user[1]}}</code></p>
+          <p>E-mail: <code>{{user[3]}}</code></p>   
+          <hr>
+        </div>
+       
+        <!-- <div class="d-grid gap-2 col-3"> -->
+        <!-- <div class="container-fluid"></div> -->
+          <button class="btn btn-sm btn-primary" type="button">Change password</button>
+          <p></p>
+          <button class="btn btn-danger" type="button" data-bs-toggle="modal" data-bs-target="#popup">Delete Account</button>
+        </div>
+      </div>
+      <div id="popup" class="modal">
+        <div class="modal-dialog modal-dialog-centered">
+                 <div class="modal-content">
+                  <div class="modal-header">
+                       <p class="fw-bold"> Are you sure you want to delete your account?  This action is irreversible.</p>
+                        
+                  
+                        
+                   </div>     
+                  <div class="modal-footer">
+         
+                     <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Delete
+                     </button>
+                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back
+                                </button>
+                        </div>
+                 </div>
+        </div>
+   </div>
+    <!-- </div> -->
+    <div class="tab-pane fade " id="submissions" role="tabpanel" aria-labelledby="submissions-tab">
+      {%if submissions%}
       <table class="table table-hover">
         <thead>
             <tr>
-              <th scope="col">#</th>
               <th scope="col">Title</th>
               <th scope="col">Rating</th>
               <th scope="col">Excerpt</th>
@@ -71,31 +102,31 @@ Account
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Mark</td>
-              <td>Otto</td>
-              <td>@mdo</td>
-              <td><button class="btn btn-danger btn-sm"></button></td>
+            {%for path in submissions%}
+            <tr id="{{path[0]}}">
+              <td style="cursor: pointer;" onclick="window.location='./path?id={{path[0]}}';">{{path[1]}}</td>
+              <td>{{path[5]}}</td>
+              <td>{{path[3]}}</td>
+              <td><button class="btn btn-danger btn-sm mw-1" data-placement="right"  type="button" onclick="removeSubmission('{{path[0]}}')"><i class="fa-solid fa-xmark"></i></button></td>
             </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jacob</td>
-              <td>Thornton</td>
-              <td>@fat</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td colspan="2">Larry the Bird</td>
-              <td>Thornton</td>
-              <td>@twitter</td>
-            </tr>
+            {%endfor%}
           </tbody>
     </table>
+    {%else%}
+          <h4 class="text-center pt-5">No submissions</h4>
+      {%endif%}
 
     </div>
     
   </div>
 </div>
 
+
+
+
+
+
+
+<div id="pathData" data-userId="{{userId}}"/>
+<script src="../static/js/account.js"></script>
 {% endblock %}

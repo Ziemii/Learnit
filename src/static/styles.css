@@ -33,3 +33,13 @@
 .username {
     margin-left: -3.8em;
 }
+
+[name=card] {
+    cursor: pointer;
+}
+
+[name=card]:hover {
+    transition: all 200ms ease-in-out;
+
+    transform: scale(1.02);
+}

@@ -323,46 +323,55 @@ def rate():
 def bookmark():
     pathId = request.form.get('pathId')
     userId = request.form.get('userId')
-    # print(f"userId {userId}")
-    # print(f"pathId {pathId}")
     with sqlite3.connect(_DB) as conn:
             if(userId != None and pathId != None):
                 cur = conn.cursor()
-                bookmarks = cur.execute("SELECT bookmarks FROM users WHERE id = ?", (1,)).fetchall()[0][0]
-                # rating = cur.execute("SELECT rating FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
-                print(f"bookmarks before 1st split {bookmarks}")
+                bookmarks = cur.execute("SELECT bookmarks FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
                 bookmarks = bookmarks.split(',')
            
-            
-            
-              
                 if(pathId in bookmarks):
-                    print('342')
-                    print(f"bookmarks before remove {bookmarks}")
-                    bookmarks.remove("8")
-                    print(f"bookmarks after remove {bookmarks}")
+                    bookmarks.remove(str(pathId))
                     bookmarks = ",".join(bookmarks)
-                    print(f"newbookmarks after remove {bookmarks}")
                     cur.execute("UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks,userId))
                     
                 else:
-                    print('347')
-                    print(f"pathId {pathId}")
                     bookmarks += pathId
-                    print(f"newBookmarks after add {bookmarks}")
                     bookmarks = ",".join(bookmarks)
-                    print(f"bookmarks after join {bookmarks}")
                     cur.execute("UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks,userId))
             
                 return Response("BOOKMARKING DONE", status=201, mimetype='application/json')
             return Response("BOOKMARKING FAILED", status=400, mimetype='application/json')
 
                 
-            # print(lpath)
-            return "OK"
 
 
 @app.route('/account', methods=['GET','POST'])
 @login_required
 def account():
-    return render_template('account.html', active=active)
+    userId = session['user_id']
+    bookmarks = []
+    if(userId):
+         with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor()
+            user = cur.execute("SELECT * FROM users WHERE id = ?", (int(userId),)).fetchall()[0]
+            bookmarksId = cur.execute("SELECT bookmarks FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
+            print(f"user: {user}")
+            bookmarksId = bookmarksId.split(',')
+            for pathId in bookmarksId:
+                bookmarks.append(cur.execute("SELECT * FROM lpaths WHERE id = ?", (int(pathId),)).fetchall())
+            bookmarks.pop(0)
+
+            submissions = cur.execute("SELECT * FROM lpaths WHERE userId = ?", (int(userId),)).fetchall()
+    return render_template('account.html', active=active, bookmarks=bookmarks, submissions=submissions, userId=userId, user=user)
+
+@app.route('/delete', methods=['POST'])
+@login_required
+def delete():
+    
+    pathId = request.form.get('pathId')
+    with sqlite3.connect(_DB) as conn:
+            if(pathId != None):
+                cur = conn.cursor()
+                cur.execute("DELETE FROM lpaths WHERE id=? ;", (int(pathId),))
+                return Response("DELETE DONE", status=201, mimetype='application/json')
+            return Response("DELETE FAILED", status=400, mimetype='application/json')
