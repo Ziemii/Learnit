@@ -1,79 +1,74 @@
-{% extends "layout.html" %}
-
-{% block title %}
-Register
-{% endblock %}
-
-{% block main %}
+{% extends "layout.html" %} {% block title %} Register {% endblock %} {% block
+main %}
 <div class="text-center">
-<h3>Registration<hr/></h3>
-<form action="/register" method="post">
-  <div class="mb-3">
-    <div class="register username">Username 2-10 characters:</div>
-    <input
-      autocomplete="on"
-      autofocus
-      class="form-control mx-auto w-auto"
-      id="username"
-      name="username"
-      placeholder="Username"
-      type="text"
-      maxlength="10"
-      minlength="2"
-    />
-    {%if userError%}
-    <div class="error">{{userError}}</div>
-    {%endif%}
-    
-    
-    
-  </div>
-  <div class="mb-1">
-    <div class="font-weight-light register password align-baseline">Password 4-15 characters:</div>
-    <input
-      class="form-control mx-auto w-auto"
-      id="password"
-      name="password"
-      placeholder="Password"
-      type="password"
-      minlength="4"
-      maxlength="15"
-    />
-   
-  </div>
-  <div class="mb-3">
-    <input
-      class="form-control mx-auto w-auto"
-      id="confirmPassword"
-      name="confirmPassword"
-      placeholder="Confirm Password"
-      type="password"
-      maxlength="15"
-    />
-    
-  </div>
-  <div class="mb-2">
-    <div class="font-weight-light register mail align-baseline">E-mail:</div>
-    <input
-      class="form-control mx-auto w-auto"
-      id="email"
-      name="email"
-      placeholder="email@address.com"
-      type="email"
-    />
-    {%if emailError%}
-    <div class="error">{{emailError}}</div>
-    {%endif%}
-    
-  </div>
-  <div class="form-check mb-3">
-    <input class="form-check-input" type="checkbox" id="terms" name="terms">
-    I accept <a href="/privacy">Privacy policy.</a>
-  </div>
-  
-  <button class="btn btn-success" type="submit" id="registerbtn">Register</button>
-</form>
+  <h3>
+    Registration
+    <hr />
+  </h3>
+  <form action="/register" method="post">
+    <div class="mb-3">
+      <div class="register username">Username 2-10 characters:</div>
+      <input
+        autocomplete="on"
+        autofocus
+        class="form-control mx-auto w-auto"
+        id="username"
+        name="username"
+        placeholder="Username"
+        type="text"
+        maxlength="10"
+        minlength="2"
+      />
+      {%if userError%}
+      <div class="error">{{userError}}</div>
+      {%endif%}
+    </div>
+    <div class="mb-1">
+      <div class="font-weight-light register password align-baseline">
+        Password 4-15 characters:
+      </div>
+      <input
+        class="form-control mx-auto w-auto"
+        id="password"
+        name="password"
+        placeholder="Password"
+        type="password"
+        minlength="4"
+        maxlength="15"
+      />
+    </div>
+    <div class="mb-3">
+      <input
+        class="form-control mx-auto w-auto"
+        id="confirmPassword"
+        name="confirmPassword"
+        placeholder="Confirm Password"
+        type="password"
+        maxlength="15"
+      />
+    </div>
+    <div class="mb-2">
+      <div class="font-weight-light register mail align-baseline">E-mail:</div>
+      <input
+        class="form-control mx-auto w-auto"
+        id="email"
+        name="email"
+        placeholder="email@address.com"
+        type="email"
+      />
+      {%if emailError%}
+      <div class="error">{{emailError}}</div>
+      {%endif%}
+    </div>
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="terms" name="terms" />
+      I accept <a href="/privacy">Privacy policy.</a>
+    </div>
 
+    <button class="btn btn-success" type="submit" id="registerbtn">
+      Register
+    </button>
+  </form>
 </div>
 
 <script src="../static/js/register.js"></script>

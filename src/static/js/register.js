@@ -21,21 +21,17 @@ document.getElementById("username").addEventListener("keyup", function () {
 });
 
 // Password field length check
-document
-  .getElementById("password")
-  .addEventListener("keyup", function () {
-    if (
-      document.getElementById("password").value.length < 4 ) {
-      document.getElementById("password").style.backgroundColor =
-        "#ffcfcf";
-      formStatus[1] = 0;
-      checkForm();
-    } else {
-      document.getElementById("password").style.backgroundColor = "#fff";
-      formStatus[1] = 1;
-      checkForm();
-    }
-  });
+document.getElementById("password").addEventListener("keyup", function () {
+  if (document.getElementById("password").value.length < 4) {
+    document.getElementById("password").style.backgroundColor = "#ffcfcf";
+    formStatus[1] = 0;
+    checkForm();
+  } else {
+    document.getElementById("password").style.backgroundColor = "#fff";
+    formStatus[1] = 1;
+    checkForm();
+  }
+});
 
 // Password equality check
 document
@@ -84,7 +80,7 @@ document
     }
   });
 
-// Check if every form field is valid 
+// Check if every form field is valid
 function checkForm() {
   if (
     formStatus.reduce(
@@ -97,4 +93,3 @@ function checkForm() {
     document.getElementById("registerbtn").disabled = true;
   }
 }
-

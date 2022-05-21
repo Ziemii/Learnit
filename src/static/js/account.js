@@ -40,3 +40,23 @@ function removeSubmission(pathId){
       }
     
 }
+function deleteAccount(userId){
+    
+        const purl = "./deleteAccount";
+        fetch(purl, {
+            method: 'post',
+            body: JSON.stringify(userId),
+            mode: 'cors',
+            headers: new Headers({
+              'Content-Type': 'application/json'
+            })
+          })
+            .then(
+                response => console.log(response.text())
+            ).then(
+                window.location.href = './logout'
+            ).catch (function (error) {
+                console.log('Request failed', error);
+                });
+            
+}

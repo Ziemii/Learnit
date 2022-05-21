@@ -56,7 +56,6 @@ function byAlpha(){
 
 function Search(){
     searchWord = document.getElementById('search').value;
-    // url = new URL(searchWord,'/learning-paths?search=');
     console.log(document.getElementById('search').value);
     window.location.href = '/learning-paths?search=' + searchWord;
 

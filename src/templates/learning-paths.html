@@ -8,20 +8,33 @@ block main %}
 </div>
 <div class="d-flex justify-content-around align-items-center">
   <div class="d-flex me-4">
-   
-    
-    <input type="text" id="search" class="form-control me-2" placeholder="Search by title...">
-   
-    <button class="btn btn-outline-success" type="" onclick="Search()">Search</button>
-  
+    <input
+      type="text"
+      id="search"
+      class="form-control me-2"
+      placeholder="Search by title..."
+    />
 
-    </div>
+    <button class="btn btn-outline-success" type="" onclick="Search()">
+      Search
+    </button>
+  </div>
   <div>
     <span class="font-weight-light registertip">Sort by:</span>
-    <button class="btn btn-outline-success" id="byAlpha" type="" onclick="byAlpha()">
+    <button
+      class="btn btn-outline-success"
+      id="byAlpha"
+      type=""
+      onclick="byAlpha()"
+    >
       A
     </button>
-    <button class="btn btn-outline-success" id="byRating" type="" onclick="byRating()">
+    <button
+      class="btn btn-outline-success"
+      id="byRating"
+      type=""
+      onclick="byRating()"
+    >
       <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i>
     </button>
   </div>
@@ -35,8 +48,13 @@ block main %}
 <div class="container-lg justify-content-center">
   <div class="row p-2">
     {%if paths %} {%for path in paths%}
-    <div class="col-md-4 container-fluid justify-content-center" >
-      <div class="card border-secondary w-100 m-1" name='card' onclick="window.location='./path?id={{path[0]}}';" style="width: 18rem">
+    <div class="col-md-4 container-fluid justify-content-center">
+      <div
+        class="card border-secondary w-100 m-1"
+        name="card"
+        onclick="window.location='./path?id={{path[0]}}';"
+        style="width: 18rem"
+      >
         <div class="card-body">
           <h5 class="card-title" id="title">{{path[1]}}</h5>
           <h6 class="card-subtitle mb-2 text-muted" id="tags">
@@ -47,20 +65,16 @@ block main %}
             Rating: {{path[5]}}
             <i class="fa-solid fa-star" style="color: rgb(230, 196, 9)"></i>
           </p>
-
-          <!-- <a href="path?id={{path[0]}}" class="card-link"><button class='btn btn-primary'>Open path</button></a> -->
         </div>
       </div>
     </div>
-    {%endfor%} 
-    {%else%}
-      <h1 class="container text-center mt-5">Found nothing</h1>
+    {%endfor%} {%else%}
+    <h1 class="container text-center mt-5">Found nothing</h1>
     {%endif%}
   </div>
   <div class="d-flex justify-content-around align-items-center">
     <nav aria-label="Page navigation example" class="align-items-center">
       <ul class="pagination">
-       
         {%if sortBy %} {%for i in range(pages)%}
         <li class="page-item">
           <a
@@ -69,14 +83,11 @@ block main %}
             >{{i+1}}</a
           >
         </li>
-        {%endfor%} {%elif tag %}
-        
-        {%else%} {%for i in range(pages)%}
+        {%endfor%} {%elif tag %} {%else%} {%for i in range(pages)%}
         <li class="page-item">
           <a class="page-link" href="/learning-paths?page={{i+1}}">{{i+1}}</a>
         </li>
         {%endfor%} {%endif%}
-        
       </ul>
     </nav>
   </div>
