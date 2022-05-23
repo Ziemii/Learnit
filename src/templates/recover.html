@@ -10,10 +10,11 @@ Recover credentials
      Account recovery
       <hr />
     </h3>
-</div>
+
 {%if success != null%}
 <h4>Request accepted, check your mail.</h4>
 {%else%}
+<p>To recover your account, please provide e-mail with which you registered.</p>
 <form class="mb-2" action="/recover" method="post">
   <div class="mb-3">
     <input
@@ -31,6 +32,6 @@ Recover credentials
     {%endif%}
   </div>
   <button class="btn btn-success" type="submit">Recover</button>
-</form>
+</form></div>
 {%endif%}
 {% endblock %}

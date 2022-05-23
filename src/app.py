@@ -259,7 +259,6 @@ def newPath():
 
 
 @app.route('/recover', methods=['GET', 'POST'])
-@login_required
 def recover():
     if request.method == 'POST':
         
