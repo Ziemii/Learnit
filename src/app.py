@@ -2,6 +2,7 @@
 # from tkinter import SE
 #from crypt import methods
 
+from msilib.schema import Error
 from xml.etree.ElementTree import tostring
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
@@ -224,8 +225,9 @@ def confirmation():
         cur = conn.cursor()
         cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;", (str(
             'pbkdf2:sha256:260000'+hashParam),))
-    return render_template('login.html', active=active, accActive='Account activated.')
-
+        cur.execute("DELETE from verifications WHERE verification = ?;", (str('pbkdf2:sha256:260000'+hashParam),))
+        return render_template('login.html', active=active, accActive='Account activated.')
+    return render_template('errorpage.html', active=active)
 
 @app.route('/new', methods=['GET', 'POST'])
 @login_required
@@ -257,24 +259,27 @@ def newPath():
 
 
 @app.route('/recover', methods=['GET', 'POST'])
+@login_required
 def recover():
     if request.method == 'POST':
-        title = request.form.get('title')
-        body = request.form.get('body')
+        
+        email = request.form.get('email')
         success = None
-        print(f"Title: {title}")
-        print(f"body: {body}")
-        # with sqlite3.connect(_DB) as conn:
-        #     cur = conn.cursor();
-        #     user = cur.execute("SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
-        #     if not user:
-        #         return render_template('login.html', active=active, userError = 'Username not found.')
-        #     if not check_password_hash(user[0][0], password):
-        #         return render_template('login.html', active=active, passwordError = 'Incorrect password.')
-        #     if user[0][2] != 1:
-        #         return render_template('login.html', active=active, passwordError = 'Account inactive, check your email.')
-        #     userId=user[0][1]
-        # session['user_id'] = userId
+        hash = None
+        print(f"email: {email}")
+        try:
+            with sqlite3.connect(_DB) as conn:
+                cur = conn.cursor();
+                userId = cur.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
+                if not userId:
+                    return render_template('recover.html', active=active, error = 'Email not in database')
+                recovery = str(generate_password_hash(
+                    email, method='pbkdf2:sha256', salt_length=8))
+                conn.execute("INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
+                mail_service.SendRecovery(email, hash)
+        except Exception as error:
+            print(error)
+            return render_template("errorpage.html", error="Error occured")
 
         return render_template("recover.html", active=active, success=success)
     else:
@@ -453,3 +458,34 @@ def controlPanel():
         return render_template("controlpanel.html", active=active, admin=1)
     else:
         return render_template("controlpanel.html", active=active)
+
+@app.route('/changepassword', methods=['GET', 'POST'])
+@login_required
+def changePassword():
+    active = [0,0,0] 
+    if request.method == 'POST':
+        userId = session['user_id']
+        old = request.form.get('old')
+        password = request.form.get('password')
+        try:
+            with sqlite3.connect(_DB) as conn:
+                cur = conn.cursor()
+                passwordHash = cur.execute(
+                    "SELECT passwordhash FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
+                print(f"password hash: {passwordHash}")
+                if passwordHash != None:
+                    hash = generate_password_hash(
+                        old, method='pbkdf2:sha256', salt_length=8)
+                    print(f"hash: {hash}")
+                    if check_password_hash(passwordHash, old):
+                        newHash = hash = generate_password_hash(
+                        password, method='pbkdf2:sha256', salt_length=8)
+                        cur.execute("UPDATE users SET passwordhash = ?;",(newHash,))
+                        return render_template("changepassword.html", active=active, passwordChange="Password changed")
+                    return render_template("changepassword.html", active=active, passwordError="Incorrect password")
+                else:
+                    return render_template("changepassword.html", active=active, passwordChange="Password not changed")
+        except Exception as error:
+            return print(f"error: {error}")
+    else:
+        return render_template("changepassword.html", active=active)

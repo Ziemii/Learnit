@@ -52,3 +52,40 @@ def SendConfirmation(receiver, hash):
     with smtplib.SMTP_SSL(SMTPhost, port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message.as_string())
+
+def SendRecovery(receiver, hash):
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Account Verification"
+    message["From"] = f"Learn!T <{sender_email}>"
+    message["To"] = receiver
+
+    text = f"""\
+    Hi,
+    How are you?
+    Your confirmation: {hash}
+    www.realpython.com"""
+
+
+    html = f"""\
+    <html>
+    <body>
+        <p>Hi,<br>
+        Below you can reset your password<br>
+        <a href="{os.getenv('LOCALHOST')+"recover?pass="+hash}">Your confirmation</a><br>
+        {os.getenv('LOCALHOST')+"recover?pass="+hash}
+         
+        has many great tutorials.
+        </p>
+    </body>
+    </html>
+    """
+
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")  
+    message.attach(part1)
+    message.attach(part2)
+    
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(SMTPhost, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message.as_string())

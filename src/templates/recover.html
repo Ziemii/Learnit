@@ -17,13 +17,19 @@ Recover credentials
 <form class="mb-2" action="/recover" method="post">
   <div class="mb-3">
     <input
+      autocomplete="on"
+      autofocus
       class="form-control mx-auto w-auto"
-      id="credential"
-      name="credential"
-      placeholder="Chosen credential"
-      type="text"
-      maxlength="15"
+      id="email"
+      name="email"
+      placeholder="your@email.com"
+      type="email"
+      
     />
+    {%if emailError != null%}
+    <p class="font-weight-light error">{{emailError}}</p>
+    {%endif%}
+  </div>
   <button class="btn btn-success" type="submit">Recover</button>
 </form>
 {%endif%}

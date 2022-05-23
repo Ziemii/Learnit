@@ -20,7 +20,7 @@ function removeBookmark(pathId){
     return location.reload();
 }
 function removeSubmission(pathId){
-    if (confirm('Are you sure you want to delete this submission from database?')) {
+   
         // Save it!
         var url = "/delete";
         var params = "pathId="+pathId;
@@ -35,9 +35,7 @@ function removeSubmission(pathId){
         wait(200);
         document.getElementById(pathId).remove();
         // return location.reload();
-    } else {
-        // Do nothing!
-      }
+     
     
 }
 function deleteAccount(userId){
@@ -60,3 +58,6 @@ function deleteAccount(userId){
                 });
             
 }
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip({ placement: "right" });
+});
