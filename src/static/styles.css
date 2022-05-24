@@ -47,3 +47,8 @@
 .accActive{
     color: darkgreen;
 }
+.ghost{
+    position: absolute;  
+    left: -999999px;
+    opacity: 0.0;
+}

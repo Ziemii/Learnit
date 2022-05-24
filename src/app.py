@@ -261,28 +261,63 @@ def newPath():
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
     if request.method == 'POST':
-        
-        email = request.form.get('email')
-        success = None
-        hash = None
-        print(f"email: {email}")
-        try:
-            with sqlite3.connect(_DB) as conn:
-                cur = conn.cursor();
-                userId = cur.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
-                if not userId:
-                    return render_template('recover.html', active=active, error = 'Email not in database')
-                recovery = str(generate_password_hash(
-                    email, method='pbkdf2:sha256', salt_length=8))
-                conn.execute("INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
-                mail_service.SendRecovery(email, hash)
-        except Exception as error:
-            print(error)
-            return render_template("errorpage.html", error="Error occured")
+        if(request.form.get('email', False)):
+            email = request.form.get('email')
+            success = None
+            print(f"email: {email}")
+            try:
+                with sqlite3.connect(_DB) as conn:
+                    cur = conn.cursor();
+                    userId = cur.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
+                    if not userId:
+                        return render_template('recover.html', active=active, error = 'Email not in database')
+                    recovery = str(generate_password_hash(
+                        email, method='pbkdf2:sha256', salt_length=8))
+                    conn.execute("INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
+                    mail_service.SendRecovery(email, recovery)
+            except Exception as error:
+                print(error)
+                return render_template("errorpage.html",active=active, error="Error occured")
 
-        return render_template("recover.html", active=active, success=success)
+            return render_template("recover.html", active=active, success="Request accepted, check your mail.")
+        else:
+            userId = request.form.get('formId')
+            password = request.form.get('password')
+            try:
+                with sqlite3.connect(_DB) as conn:
+                    cur = conn.cursor()
+                    
+                    hash = generate_password_hash(
+                            password, method='pbkdf2:sha256', salt_length=8)
+                    print(f"hash: {hash}")
+                    print(f"userId: {userId}")
+                        
+                    cur.execute("UPDATE users SET passwordhash = ? WHERE id = ?;",(hash,userId))
+                    return render_template("recover.html", active=active, success="Password changed")
+                   
+            except Exception as error:
+                return print(f"error: {error}")
+
     else:
-        return render_template("recover.html", active=active)
+        recovery = request.args.get('pass', None)
+        if recovery != None:
+            try:
+                with sqlite3.connect(_DB) as conn:
+                    cur = conn.cursor();
+                    dbRecovery = cur.execute("SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
+                    print(f"dbrecovery: {dbRecovery}")
+                    if int(dbRecovery) != 1:
+                        return render_template('recover.html', active=active, error = 'Error occurred, please contact owner.')
+                    else:
+                        formId=cur.execute("SELECT users.id FROM users JOIN recoveries ON recoveries.userId = users.id WHERE recovery = ?;", (recovery,)).fetchall()[0][0]
+                        print(f"formId: {formId}")
+                        cur.execute("DELETE from recoveries WHERE recovery = ?;",(recovery,))
+                        return render_template("recover.html", active=active, form=formId)
+            except Exception as error:
+                print(f"Exception: {error}")
+                return render_template("errorpage.html",active=active, error="Error occured")
+
+    return render_template("recover.html", active=active)
 
 
 @app.route('/path', methods=['GET'])
@@ -479,7 +514,7 @@ def changePassword():
                     if check_password_hash(passwordHash, old):
                         newHash = hash = generate_password_hash(
                         password, method='pbkdf2:sha256', salt_length=8)
-                        cur.execute("UPDATE users SET passwordhash = ?;",(newHash,))
+                        cur.execute("UPDATE users SET passwordhash = ? WHERE id = ?;",(newHash,userId))
                         return render_template("changepassword.html", active=active, passwordChange="Password changed")
                     return render_template("changepassword.html", active=active, passwordError="Incorrect password")
                 else:

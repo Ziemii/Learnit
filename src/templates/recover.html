@@ -10,9 +10,39 @@ Recover credentials
      Account recovery
       <hr />
     </h3>
+{%if form%}
+<form class="mb-2" action="/recover" method="post">
+  
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      class="form-control mx-auto w-auto"
+      id="password"
+      name="password"
+      placeholder="New password"
+      type="password"
+      maxlength="15"
+    />
+    
+  </div>
 
-{%if success != null%}
-<h4>Request accepted, check your mail.</h4>
+  <div class="mb-3">
+    <input
+      autocomplete="off"
+      class="form-control mx-auto w-auto"
+      id="confirmPassword"
+      name="confirmPassword"
+      placeholder="Confirm new password"
+      type="password"
+      maxlength="15"
+    />
+  </div>
+  <button class="btn btn-success" id="changebtn" type="submit" disabled>Change password</button>
+  <input class="ghost" id="formId" name="formId" value="{{form}}"/>
+ 
+</form>
+{%elif success%}
+<h4>{{success}}</h4>
 {%else%}
 <p>To recover your account, please provide e-mail with which you registered.</p>
 <form class="mb-2" action="/recover" method="post">
@@ -34,4 +64,5 @@ Recover credentials
   <button class="btn btn-success" type="submit">Recover</button>
 </form></div>
 {%endif%}
+<script src="../static/js/recover.js"></script>
 {% endblock %}
