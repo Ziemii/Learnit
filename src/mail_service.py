@@ -71,10 +71,9 @@ def SendRecovery(receiver, hash):
     <body>
         <p>Hi,<br>
         Below you can reset your password<br>
-        <a href="{os.getenv('LOCALHOST')+"recover?pass="+hash}">Your confirmation</a><br>
-        {os.getenv('LOCALHOST')+"recover?pass="+hash}
+        <div> </div>
+        <a href="{os.getenv('LOCALHOST')+"recover?pass="+hash}">RESET</a><br>
          
-        has many great tutorials.
         </p>
     </body>
     </html>

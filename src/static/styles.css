@@ -52,3 +52,7 @@
     left: -999999px;
     opacity: 0.0;
 }
+
+.note-group-select-from-files {
+    display: none;
+  }
