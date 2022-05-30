@@ -61,7 +61,7 @@ def learningPaths():
         cur = conn.cursor()
 
         count = int(cur.execute(
-            "SELECT COUNT(*) FROM lpaths;").fetchall()[0][0])
+            "SELECT COUNT(*) FROM lpaths WHERE isActive=1;").fetchall()[0][0])
 
         pages = 0
         if((count % limit) > 0):
@@ -72,12 +72,12 @@ def learningPaths():
         if(tag):
 
             lpaths = cur.execute(
-                "SELECT * FROM lpaths WHERE tags LIKE ?;", ("%"+tag+"%",)).fetchall()
+                "SELECT * FROM lpaths WHERE tags LIKE ? AND isActive = 1;", ("%"+tag+"%",)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, pages=0, tag=tag)
 
         if(search):
             lpaths = cur.execute(
-                "SELECT * FROM lpaths WHERE title LIKE ? ORDER BY id DESC LIMIT ?;", ("%"+search+"%", limit,)).fetchall()
+                "SELECT * FROM lpaths WHERE title LIKE ? AND isActive = 1 ORDER BY id DESC LIMIT ?;", ("%"+search+"%", limit,)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, tag='x')
 
         if(sortBy and page):
@@ -85,46 +85,46 @@ def learningPaths():
             match sortBy:
                 case 'rating':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY rating DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case 'alpha':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY title LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case '!rating':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY rating LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case '!alpha':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY title DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
         if(sortBy):
             match sortBy:
                 case 'rating':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY rating LIMIT ?;", (limit,)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating LIMIT ?;", (limit,)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case 'alpha':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY title LIMIT ?;", (limit,)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title LIMIT ?;", (limit,)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case '!rating':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY rating DESC LIMIT ?;", (limit,)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating DESC LIMIT ?;", (limit,)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
                 case '!alpha':
                     lpaths = cur.execute(
-                        "SELECT * FROM lpaths ORDER BY title DESC LIMIT ?;", (limit,)).fetchall()
+                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ?;", (limit,)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
         if(page):
 
             lpaths = cur.execute(
-                "SELECT * FROM lpaths ORDER BY id DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
+                "SELECT * FROM lpaths WHERE isActive=1 ORDER BY id DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages)
 
         lpaths = cur.execute(
-            "SELECT * FROM lpaths ORDER BY id DESC LIMIT ?;", (limit,)).fetchall()
+            "SELECT * FROM lpaths WHERE isActive=1 ORDER BY id DESC LIMIT ?;", (limit,)).fetchall()
 
         if not lpaths:
             active = [0, 0, 0]
@@ -435,7 +435,7 @@ def account():
             bookmarks.pop(0)
 
             submissions = cur.execute(
-                "SELECT * FROM lpaths WHERE userId = ?", (int(userId),)).fetchall()
+                "SELECT * FROM lpaths WHERE userId = ? AND isActive=1", (int(userId),)).fetchall()
     return render_template('account.html', active=active, bookmarks=bookmarks, submissions=submissions, userId=userId, user=user)
 
 
@@ -470,27 +470,33 @@ def deleteAccount():
 @app.route('/controlpanel', methods=['GET', 'POST'])
 def controlPanel():
     active = [0, 0, 0]
-    # session.clear()
-    session['admin_id'] = None
     if request.method == 'POST':
         password = request.form.get('password')
-        adminId = None
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor()
             password = cur.execute(
                 "SELECT password FROM admin WHERE id = 1").fetchall()[0][0]
-            print(f"password {password}")
             if not password:
                 return redirect('/')
             if password != password:
                 return redirect('/')
-            adminId = 1
-        session['admin_id'] = adminId
-
-        return redirect("/controlpanel")
-    if request.method == 'GET' and session['admin_id'] != None:
-        return render_template("controlpanel.html", active=active, admin=1)
+            evals = cur.execute(
+                "SELECT * FROM lpaths WHERE isActive = 0").fetchall()
+            print(f"evals {evals}")
+            submissions = cur.execute(
+                "SELECT * FROM lpaths WHERE isActive = 1").fetchall()
+            print(f"submissions {submissions}")
+            if not evals:
+                evals=None
+            # else:
+            #     evals=evals[0][0]
+            if not submissions:
+                submissions=None
+            # else:
+            #     submissions = submissions[0][0]
+        return render_template("controlpanel.html", active=active, admin=1, evals=evals, submissions=submissions)
     else:
+
         return render_template("controlpanel.html", active=active)
 
 @app.route('/changepassword', methods=['GET', 'POST'])
