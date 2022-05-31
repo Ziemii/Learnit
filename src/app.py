@@ -1,6 +1,3 @@
-# from crypt import methods
-# from tkinter import SE
-#from crypt import methods
 
 from msilib.schema import Error
 from xml.etree.ElementTree import tostring
@@ -34,12 +31,10 @@ active = [0, 0, 0]
 # Landing page
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    active = [1, 0, 0]
-    return render_template("index.html", active=active)
-
-#
+    # active = [0, 1, 0]
+    return redirect('/learning-paths')
 
 
 @app.route('/learning-paths', methods=['GET'])
@@ -54,7 +49,7 @@ def learningPaths():
     if not page:
         page = 1
 
-    sortBy = request.args.get('sortBy')  # rating, alpha
+    sortBy = request.args.get('sortBy')
 
     limit = 6
     with sqlite3.connect(_DB) as conn:
@@ -195,7 +190,6 @@ def register():
                     "SELECT id FROM users WHERE login = ?", (username,)).fetchall()[0][0]
                 verification = str(generate_password_hash(
                     username, method='pbkdf2:sha256', salt_length=8))
-                # veritest = verification.lstrip("pbkdf2:sha256:260000")
                 cur.execute(
                     "INSERT INTO verifications (verification, userId) VALUES (?,?)", (verification, userId))
                 mail_service.SendConfirmation(
@@ -225,9 +219,11 @@ def confirmation():
         cur = conn.cursor()
         cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;", (str(
             'pbkdf2:sha256:260000'+hashParam),))
-        cur.execute("DELETE from verifications WHERE verification = ?;", (str('pbkdf2:sha256:260000'+hashParam),))
+        cur.execute("DELETE from verifications WHERE verification = ?;",
+                    (str('pbkdf2:sha256:260000'+hashParam),))
         return render_template('login.html', active=active, accActive='Account activated.')
     return render_template('errorpage.html', active=active)
+
 
 @app.route('/new', methods=['GET', 'POST'])
 @login_required
@@ -242,16 +238,15 @@ def newPath():
         filteredTags = ''.join(
             (filter(lambda x: x not in [' ', ',', '!', '?'], tags)))
         userId = session['user_id']
-        print(f"Title: {title}")
-        print(f"body: {body}")
-        print(f"Tags: {tags}")
-        print(f"filtered tags: {filteredTags}")
-        with sqlite3.connect(_DB) as conn:
-            cur = conn.cursor()
-            cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",
-                        (title, filteredTags, excerpt, body, userId))
+        try:
+            with sqlite3.connect(_DB) as conn:
+                cur = conn.cursor()
+                cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",
+                            (title, filteredTags, excerpt, body, userId))
+        except Exception:
+            return render_template("errorpage.html", error="Database error.")
 
-        return redirect("/new")
+        return render_template("new_path.html", active=active, success=1)
 
     else:
 
@@ -264,20 +259,21 @@ def recover():
         if(request.form.get('email', False)):
             email = request.form.get('email')
             success = None
-            print(f"email: {email}")
             try:
                 with sqlite3.connect(_DB) as conn:
-                    cur = conn.cursor();
-                    userId = cur.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
+                    cur = conn.cursor()
+                    userId = cur.execute(
+                        "SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
                     if not userId:
-                        return render_template('recover.html', active=active, error = 'Email not in database')
+                        return render_template('recover.html', active=active, error='Email not in database')
                     recovery = str(generate_password_hash(
                         email, method='pbkdf2:sha256', salt_length=8))
-                    conn.execute("INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
+                    conn.execute(
+                        "INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
                     mail_service.SendRecovery(email, recovery)
             except Exception as error:
                 print(error)
-                return render_template("errorpage.html",active=active, error="Error occured")
+                return render_template("errorpage.html", active=active, error="Error occured")
 
             return render_template("recover.html", active=active, success="Request accepted, check your mail.")
         else:
@@ -286,15 +282,14 @@ def recover():
             try:
                 with sqlite3.connect(_DB) as conn:
                     cur = conn.cursor()
-                    
+
                     hash = generate_password_hash(
-                            password, method='pbkdf2:sha256', salt_length=8)
-                    print(f"hash: {hash}")
-                    print(f"userId: {userId}")
-                        
-                    cur.execute("UPDATE users SET passwordhash = ? WHERE id = ?;",(hash,userId))
+                        password, method='pbkdf2:sha256', salt_length=8)
+
+                    cur.execute(
+                        "UPDATE users SET passwordhash = ? WHERE id = ?;", (hash, userId))
                     return render_template("recover.html", active=active, success="Password changed")
-                   
+
             except Exception as error:
                 return print(f"error: {error}")
 
@@ -303,19 +298,20 @@ def recover():
         if recovery != None:
             try:
                 with sqlite3.connect(_DB) as conn:
-                    cur = conn.cursor();
-                    dbRecovery = cur.execute("SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
-                    print(f"dbrecovery: {dbRecovery}")
+                    cur = conn.cursor()
+                    dbRecovery = cur.execute(
+                        "SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
                     if int(dbRecovery) != 1:
-                        return render_template('recover.html', active=active, error = 'Error occurred, please contact owner.')
+                        return render_template('recover.html', active=active, error='Error occurred, please contact owner.')
                     else:
-                        formId=cur.execute("SELECT users.id FROM users JOIN recoveries ON recoveries.userId = users.id WHERE recovery = ?;", (recovery,)).fetchall()[0][0]
-                        print(f"formId: {formId}")
-                        cur.execute("DELETE from recoveries WHERE recovery = ?;",(recovery,))
+                        formId = cur.execute(
+                            "SELECT users.id FROM users JOIN recoveries ON recoveries.userId = users.id WHERE recovery = ?;", (recovery,)).fetchall()[0][0]
+                        cur.execute(
+                            "DELETE from recoveries WHERE recovery = ?;", (recovery,))
                         return render_template("recover.html", active=active, form=formId)
             except Exception as error:
                 print(f"Exception: {error}")
-                return render_template("errorpage.html",active=active, error="Error occured")
+                return render_template("errorpage.html", active=active, error="Error occured")
 
     return render_template("recover.html", active=active)
 
@@ -327,9 +323,7 @@ def path():
     bookmark = 0
     userId = None
     voted = None
-    # if(session['user_id']):
     userId = session.get('user_id')
-    # print(f"userId {userId}")
     with sqlite3.connect(_DB) as conn:
         cur = conn.cursor()
         if(userId != None):
@@ -337,11 +331,8 @@ def path():
                 "SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
             bookmarks = cur.execute(
                 "SELECT bookmarks FROM users WHERE id = ?", (userId,)).fetchall()[0][0]
-            # print(f"voted {voted}")
             bookmarksList = bookmarks.split(',')
-            print(f"bookmarksList: {bookmarksList}")
             votedList = voted.split(',')
-            # print(f"votedList {votedList}")
             if(str(userId) in votedList):
                 voted = 'voted'
             if(str(pathId) in bookmarksList):
@@ -350,7 +341,6 @@ def path():
             "SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
         if not lpath:
             return redirect('/')
-        # print(lpath)
 
     return render_template("path.html", active=active, lpath=lpath, userId=userId, voted=voted, bookmark=bookmark)
 
@@ -375,14 +365,12 @@ def rate():
 
             voted = cur.execute(
                 "SELECT voted FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0][0]
-            print(voted)
             if(userId in voted):
                 userId = 'voted'
             lpath = cur.execute(
                 "SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
             if not lpath:
                 return redirect('/')
-            # print(lpath)
             return Response("RATED", status=201, mimetype='application/json')
         return Response("NOT RATED", status=400, mimetype='application/json')
 
@@ -427,7 +415,6 @@ def account():
                 "SELECT * FROM users WHERE id = ?", (int(userId),)).fetchall()[0]
             bookmarksId = cur.execute(
                 "SELECT bookmarks FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
-            print(f"user: {user}")
             bookmarksId = bookmarksId.split(',')
             for pathId in bookmarksId:
                 bookmarks.append(cur.execute(
@@ -435,7 +422,7 @@ def account():
             bookmarks.pop(0)
 
             submissions = cur.execute(
-                "SELECT * FROM lpaths WHERE userId = ? AND isActive=1", (int(userId),)).fetchall()
+                "SELECT * FROM lpaths WHERE userId = ?;", (int(userId),)).fetchall()
     return render_template('account.html', active=active, bookmarks=bookmarks, submissions=submissions, userId=userId, user=user)
 
 
@@ -457,15 +444,14 @@ def delete():
 def deleteAccount():
 
     userId = request.get_json()
-    print(f"userId: {userId}")
     with sqlite3.connect(_DB) as conn:
         if(userId != None):
-            print("not none")
             cur = conn.cursor()
             cur.execute("DELETE FROM users WHERE id=? ;", (int(userId),))
             cur.execute("DELETE FROM lpaths WHERE userId=? ;", (int(userId),))
             return Response("DELETE DONE", status=201, mimetype='application/json')
         return Response("DELETE FAILED", status=400, mimetype='application/json')
+
 
 @app.route('/controlpanel', methods=['GET', 'POST'])
 def controlPanel():
@@ -482,27 +468,24 @@ def controlPanel():
                 return redirect('/')
             evals = cur.execute(
                 "SELECT * FROM lpaths WHERE isActive = 0").fetchall()
-            print(f"evals {evals}")
             submissions = cur.execute(
                 "SELECT * FROM lpaths WHERE isActive = 1").fetchall()
-            print(f"submissions {submissions}")
             if not evals:
-                evals=None
-            # else:
-            #     evals=evals[0][0]
+                evals = None
+
             if not submissions:
-                submissions=None
-            # else:
-            #     submissions = submissions[0][0]
+                submissions = None
+
         return render_template("controlpanel.html", active=active, admin=1, evals=evals, submissions=submissions)
     else:
 
         return render_template("controlpanel.html", active=active)
 
+
 @app.route('/changepassword', methods=['GET', 'POST'])
 @login_required
 def changePassword():
-    active = [0,0,0] 
+    active = [0, 0, 0]
     if request.method == 'POST':
         userId = session['user_id']
         old = request.form.get('old')
@@ -512,15 +495,14 @@ def changePassword():
                 cur = conn.cursor()
                 passwordHash = cur.execute(
                     "SELECT passwordhash FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
-                print(f"password hash: {passwordHash}")
                 if passwordHash != None:
                     hash = generate_password_hash(
                         old, method='pbkdf2:sha256', salt_length=8)
-                    print(f"hash: {hash}")
                     if check_password_hash(passwordHash, old):
                         newHash = hash = generate_password_hash(
-                        password, method='pbkdf2:sha256', salt_length=8)
-                        cur.execute("UPDATE users SET passwordhash = ? WHERE id = ?;",(newHash,userId))
+                            password, method='pbkdf2:sha256', salt_length=8)
+                        cur.execute(
+                            "UPDATE users SET passwordhash = ? WHERE id = ?;", (newHash, userId))
                         return render_template("changepassword.html", active=active, passwordChange="Password changed")
                     return render_template("changepassword.html", active=active, passwordError="Incorrect password")
                 else:
@@ -529,3 +511,21 @@ def changePassword():
             return print(f"error: {error}")
     else:
         return render_template("changepassword.html", active=active)
+
+
+@app.route('/verdict', methods=['POST'])
+@login_required
+def verdict():
+    id = request.form.get('pathId')
+    verdict = request.form.get('verdict')
+    try:
+        with sqlite3.connect(_DB) as conn:
+            cur = conn.cursor()
+            if (verdict):
+                cur.execute(
+                    "UPDATE lpaths SET isActive = 1 WHERE id = ?;", (id,))
+            else:
+                cur.execute("DELETE FROM lpaths WHERE id = ?;", (id,))
+    except Exception as error:
+        return print(f"error: {error}")
+    return Response("Verdict made", status=200, mimetype='application/json')

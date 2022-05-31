@@ -12,7 +12,6 @@ function removeBookmark(pathId){
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     
-    //Send the proper header information along with the request
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
     xhr.send(params)
@@ -21,20 +20,17 @@ function removeBookmark(pathId){
 }
 function removeSubmission(pathId){
    
-        // Save it!
         var url = "/delete";
         var params = "pathId="+pathId;
         console.log(params)
         var xhr = new XMLHttpRequest();
         xhr.open("POST", url, true);
     
-        //Send the proper header information along with the request
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
         xhr.send(params)
         wait(200);
         document.getElementById(pathId).remove();
-        // return location.reload();
      
     
 }

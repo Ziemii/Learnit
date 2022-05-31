@@ -1,5 +1,9 @@
 {% extends "layout.html" %} {% block title %} Create new path {% endblock %} {%
-block main %}
+block main %} {%if success%}
+<div class="text-center m-2">
+  <h3>Submission successful! It will be visible after verification.</h3>
+</div>
+{%else%}
 <div class="text-center">
   <h3>
     New path creation
@@ -47,7 +51,14 @@ block main %}
     </div>
     <div class="form-group">
       <label for="summernote">Body</label>
-      <textarea class="form-control" id="summernote" name="body" required minlength="100" placeholder="It's all yours."></textarea>
+      <textarea
+        class="form-control"
+        id="summernote"
+        name="body"
+        required
+        minlength="100"
+        placeholder="It's all yours."
+      ></textarea>
     </div>
     <div class="d-flex justify-content-end">
       <button class="btn btn-success m-2" type="submit" id="">
@@ -69,5 +80,4 @@ block main %}
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <script src="../static/js/new_path.js"></script>
-
-{% endblock %}
+{%endif%} {% endblock %}

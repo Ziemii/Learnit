@@ -77,24 +77,32 @@ main %}
             >
               {{path[0][1]}}
             </td>
-            <td 
-            style="cursor: pointer"
-            onclick="window.location='./path?id={{path[0][0]}}';"
-            >{{path[0][5]}}</td>
             <td
-            style="cursor: pointer"
+              style="cursor: pointer"
               onclick="window.location='./path?id={{path[0][0]}}';"
-            >{{path[0][3]}}</td>
-            <td><span class="d-inline-block" data-toggle="tooltip" title="Remove bookmark">
-              <button
-                class="btn btn-danger btn-sm mw-1"
-                data-placement="right"
-                type="button"
-                onclick="removeBookmark('{{path[0][0]}}')"
+            >
+              {{path[0][5]}}
+            </td>
+            <td
+              style="cursor: pointer"
+              onclick="window.location='./path?id={{path[0][0]}}';"
+            >
+              {{path[0][3]}}
+            </td>
+            <td>
+              <span
+                class="d-inline-block"
+                data-toggle="tooltip"
+                title="Remove bookmark"
               >
-              
-              <i class="fa-solid fa-bookmark"></i>
-              </button></span>
+                <button
+                  class="btn btn-danger btn-sm mw-1"
+                  data-placement="right"
+                  type="button"
+                  onclick="removeBookmark('{{path[0][0]}}')"
+                >
+                  <i class="fa-solid fa-bookmark"></i></button
+              ></span>
             </td>
           </tr>
           {%endfor%}
@@ -119,14 +127,9 @@ main %}
           <hr />
         </div>
 
-        
-        
-          <a
-                class="btn btn-sm btn-primary"
-                type="button"
-                href="/changepassword"
-              >
-          Change password</a>
+        <a class="btn btn-sm btn-primary" type="button" href="/changepassword">
+          Change password</a
+        >
         <p></p>
         <button
           class="btn btn-danger"
@@ -193,17 +196,34 @@ main %}
             >
               {{path[1]}}
             </td>
-            <td>{{path[5]}}</td>
-            <td>{{path[3]}}</td>
-            <td><div id="submissionpopup" class="modal">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <p class="fw-bold">
-                      Are you sure?
-                    </p>
-                  </div>
-                  <!-- <div class="modal-footer"> -->
+            {%if path[6] == 0%}
+            <td
+              style="cursor: pointer; color: red"
+              onclick="window.location='./path?id={{path[0]}}';"
+            >
+              INACTIVE
+            </td>
+            {%else%}
+            <td
+              style="cursor: pointer"
+              onclick="window.location='./path?id={{path[0]}}';"
+            >
+              {{path[5]}}
+            </td>
+            {%endif%}
+            <td
+              style="cursor: pointer"
+              onclick="window.location='./path?id={{path[0]}}';"
+            >
+              {{path[3]}}
+            </td>
+            <td>
+              <div id="submissionpopup" class="modal">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <p class="fw-bold">Are you sure?</p>
+                    </div>
                     <button
                       type="button"
                       class="btn btn-danger"
@@ -219,20 +239,23 @@ main %}
                     >
                       Back
                     </button>
-                  <!-- </div> -->
+                  </div>
                 </div>
               </div>
-            </div><span class="d-inline-block" data-toggle="tooltip" title="Remove submission">
-              <button
-           
-                class="btn btn-danger btn-sm mw-1"
-                data-placement="right"
-                type="button" data-bs-toggle="modal"
-                data-bs-target="#submissionpopup"
-                
+              <span
+                class="d-inline-block"
+                data-toggle="tooltip"
+                title="Remove submission"
               >
-                <i class="fa-solid fa-xmark"></i>
-              </button></span>
+                <button
+                  class="btn btn-danger btn-sm mw-1"
+                  data-placement="right"
+                  type="button"
+                  data-bs-toggle="modal"
+                  data-bs-target="#submissionpopup"
+                >
+                  <i class="fa-solid fa-xmark"></i></button
+              ></span>
             </td>
           </tr>
           {%endfor%}

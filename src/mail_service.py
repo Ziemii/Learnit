@@ -13,8 +13,6 @@ SMTPhost = os.getenv('HOST')
 password = os.getenv('MAILSSWORD')
 port = os.getenv('PORT')
 
-# receiver_email = "ziemi.siema@gmail.com"
-
 
 def SendConfirmation(receiver, hash):
 
@@ -52,7 +50,7 @@ def SendConfirmation(receiver, hash):
                 <div><a href="{os.getenv('LOCALHOST')+"confirmation?pass="+hash}">ACTIVATE ACCOUNT</a></div>
             </p>
             <div class="ignorant">
-                If you didn't create new account on our site, ignore that message.
+                If you didn't create new account on our site, ignore this message.
             </div>
         </div>
     </body>
@@ -72,7 +70,7 @@ def SendConfirmation(receiver, hash):
 
 def SendRecovery(receiver, hash):
     message = MIMEMultipart("alternative")
-    message["Subject"] = "Account Verification"
+    message["Subject"] = "Password Reset Request"
     message["From"] = f"Learn!T <{sender_email}>"
     message["To"] = receiver
 
@@ -105,7 +103,7 @@ def SendRecovery(receiver, hash):
                 <div><a href="{os.getenv('LOCALHOST')+"recover?pass="+hash}">RESET PASSWORD</a></div>
             </p>
             <div class="ignorant">
-                If you didn't request reset, ignore that message.
+                If you didn't request reset, ignore this message.
             </div>
         </div>
     </body>

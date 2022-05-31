@@ -5,5 +5,19 @@ Home
 {% endblock %}
 
 {% block main %}
-<p>Hello world</p>
+<h3 class="text-center">
+    {{lpath[1]}}
+    <hr />
+  </h3>
+  <div class="container-md">
+    <div class="d-lg-flex flex-column">
+      <div class="p-2">
+        <h6 class="card-subtitle mb-2 text-muted" id="tags">
+          Tags: <span name="tags">{{lpath[2]}}</span>
+        </h6>
+      </div>
+      <div class="p-2 fst-italic">{{lpath[3]}}</div>
+      <div class="p-3 cardBody">{{lpath[4]|safe}}</div>
+    </div>
+  </div>
 {% endblock %}

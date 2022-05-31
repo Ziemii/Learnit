@@ -1,11 +1,5 @@
-{% extends "layout.html" %}
-
-{% block title %}
-Admin Control Panel
-{% endblock %}
-
-{% block main %}
-{%if admin%}
+{% extends "layout.html" %} {% block title %} Admin Control Panel {% endblock %}
+{% block main %} {%if admin%}
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item" role="presentation">
     <button
@@ -18,21 +12,7 @@ Admin Control Panel
       aria-controls="evals"
       aria-selected="true"
     >
-      <i class="fa-solid fa-bookmark"></i> For evaluation
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button
-      class="nav-link"
-      id="submissions-tab"
-      data-bs-toggle="tab"
-      data-bs-target="#submissions"
-      type="button"
-      role="tab"
-      aria-controls="submissions"
-      aria-selected="false"
-    >
-      <i class="fa-solid fa-file-pen"></i> Submissions
+      <i class="fa-solid fa-check-to-slot"></i> For evaluation
     </button>
   </li>
 </ul>
@@ -50,7 +30,6 @@ Admin Control Panel
           <th scope="col">Id</th>
           <th scope="col">UserId</th>
           <th scope="col">Title</th>
-          <th scope="col">Rating</th>
           <th scope="col">Excerpt</th>
           <th scope="col"></th>
         </tr>
@@ -65,42 +44,44 @@ Admin Control Panel
           >
             {{path[0]}}
           </td>
-          <td 
-          style="cursor: pointer"
-          onclick="window.location='./path?id={{path[0]}}';"
-          >{{path[8]}}</td>
           <td
-          style="cursor: pointer"
+            style="cursor: pointer"
             onclick="window.location='./path?id={{path[0]}}';"
-          >{{path[1]}}</td>
+          >
+            {{path[8]}}
+          </td>
           <td
-          style="cursor: pointer"
+            style="cursor: pointer"
             onclick="window.location='./path?id={{path[0]}}';"
-          >{{path[5]}}</td>
+          >
+            {{path[1]}}
+          </td>
+
           <td
-          style="cursor: pointer"
+            style="cursor: pointer"
             onclick="window.location='./path?id={{path[0]}}';"
-          >{{path[3]}}</td>
-          <td><span class="d-inline-block" data-toggle="tooltip" title="Remove bookmark">
-            <button
-              class="btn btn-primary btn-sm mw-1"
-              data-placement="right"
-              type="button"
-              onclick="removeBookmark('{{path[0]}}')"
-            >
-            
-            <i class="fa-solid fa-bookmark"></i>
-            </button></span>
-            <span class="d-inline-block" data-toggle="tooltip" title="Remove bookmark">
+          >
+            {{path[3]}}
+          </td>
+          <td>
+            <span class="d-inline-block" data-toggle="tooltip" title="Accept">
+              <button
+                class="btn btn-success btn-sm mw-1"
+                data-placement="right"
+                type="button"
+                onclick="verdict(1,'{{path[0]}}')"
+              >
+                <i class="fa-solid fa-circle-check"></i></button
+            ></span>
+            <span class="d-inline-block" data-toggle="tooltip" title="Reject">
               <button
                 class="btn btn-danger btn-sm mw-1"
                 data-placement="right"
                 type="button"
-                onclick="removeBookmark('{{path[0]}}')"
+                onclick="verdict(0,'{{path[0]}}')"
               >
-              
-              <i class="fa-solid fa-bookmark"></i>
-              </button></span>
+                <i class="fa-solid fa-ban"></i></button
+            ></span>
           </td>
         </tr>
         {%endfor%}
@@ -113,25 +94,24 @@ Admin Control Panel
 </div>
 {%else%}
 <div class="text-center">
-    <form class="mb-2" action="/controlpanel" method="post">
-        <div class="mb-3">
-          <input
-            class="form-control mx-auto w-auto"
-            id="password"
-            name="password"
-            placeholder="Password"
-            type="password"
-            maxlength="15"
-            autocomplete="off"
-          />
-          {%if passwordError != null%}
-          <p class="font-weight-light error">{{passwordError}}</p>
-          {%endif%}
-          
-        </div>
-        <button class="btn btn-success" type="submit">Enter</button>
-        
-      </form>
+  <form class="mb-2" action="/controlpanel" method="post">
+    <div class="mb-3">
+      <input
+        class="form-control mx-auto w-auto"
+        id="password"
+        name="password"
+        placeholder="Password"
+        type="password"
+        maxlength="15"
+        autocomplete="off"
+      />
+      {%if passwordError != null%}
+      <p class="font-weight-light error">{{passwordError}}</p>
+      {%endif%}
+    </div>
+    <button class="btn btn-success" type="submit">Enter</button>
+  </form>
 </div>
 {%endif%}
+<script src="../static/js/controlpanel.js"></script>
 {% endblock %}

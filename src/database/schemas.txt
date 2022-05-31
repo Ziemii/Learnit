@@ -1,23 +1,13 @@
-CREATE TABLE usersbp (                    
+### Schemas used in database ###
+
+CREATE TABLE users (                    
     id INTEGER PRIMARY KEY AUTOINCREMENT,  
     login TEXT NOT NULL UNIQUE,
     passwordhash TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     isActive INTEGER NOT NULL,
-    voted TEXT DEFAULT ""
-    );
-    INSERT INTO usersbp SELECT * FROM users;
-CREATE TABLE verifications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    verification TEXT NOT NULL,
-    userId INTEGER NOT NULL,
-    FOREIGN KEY(userId) REFERENCES users(id)
-);
-CREATE TABLE recoveries (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    recovery TEXT NOT NULL,
-    userId INTEGER NOT NULL UNIQUE,
-    FOREIGN KEY(userId) REFERENCES users(id)
+    voted TEXT DEFAULT "",
+    bookmarks TEXT DEFAULT "0"
 );
 
 CREATE TABLE lpaths (
@@ -31,65 +21,24 @@ CREATE TABLE lpaths (
     voted TEXT DEFAULT "",
     userId INTEGER,
     FOREIGN KEY(userId) REFERENCES users(id)
-)
+);
+
+CREATE TABLE verifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    verification TEXT NOT NULL,
+    userId INTEGER NOT NULL,
+    FOREIGN KEY(userId) REFERENCES users(id)
+);
+
+CREATE TABLE recoveries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recovery TEXT NOT NULL,
+    userId INTEGER NOT NULL UNIQUE,
+    FOREIGN KEY(userId) REFERENCES users(id)
+);
 
 CREATE TABLE admin (
     id INTEGER PRIMARY KEY,
     password TEXT
-)
+);
 
-CREATE TABLE backup (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    tags TEXT,
-    excerpt TEXT,
-    body TEXT,
-    rating INTEGER DEFAULT 0,
-    isActive INTEGER DEFAULT 0,
-    voted TEXT DEFAULT "",
-    userId INTEGER,
-    FOREIGN KEY(userId) REFERENCES users(id)
-)
-CREATE TABLE users (                    
-    id INTEGER PRIMARY KEY AUTOINCREMENT,  
-    login TEXT NOT NULL UNIQUE,
-    passwordhash TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    isActive INTEGER NOT NULL,
-    voted TEXT DEFAULT "",
-    bookmarks TEXT DEFAULT "0"
-    );
-INSERT INTO Destination SELECT * FROM Source;
-
-CREATE TABLE tags (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE,
-    json TEXT
-)
-
-go postgresql
-
-///Test queries
-
-/Make user active
-UPDATE users 
-SET isActive = 1 
-FROM (SELECT userId from verifications WHERE verification = 'pbkdf2:sha256:260000$XMphTVl1$bf58fd34d91f852f2d86f86ae20fa5c9194dfb99a00f1e9c384dc6070c6b9013') as verifications
-WHERE users.id = verifications.userId;   
-
-/Mock lpath
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath1user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath2user2','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 2);
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath3user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath3user2','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 2);
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath4user1','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 1);
-INSERT INTO lpaths (title, tags, excerpt, body, userId)
-VALUES( 'titlepath4user3','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY', 3);
-
-INSERT INTO lpaths (title, tags, excerpt, body, rating, userId)
-VALUES( 'titlepath4user3','baba, gaga, lulu','Iam excerpt','IAM THE BODYYYYY',2 , 3);
