@@ -1,5 +1,6 @@
 ### Schemas used in database ###
 
+# Users schema
 CREATE TABLE users (                    
     id INTEGER PRIMARY KEY AUTOINCREMENT,  
     login TEXT NOT NULL UNIQUE,
@@ -10,6 +11,7 @@ CREATE TABLE users (
     bookmarks TEXT DEFAULT "0"
 );
 
+# Learning paths schema
 CREATE TABLE lpaths (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
@@ -23,6 +25,7 @@ CREATE TABLE lpaths (
     FOREIGN KEY(userId) REFERENCES users(id)
 );
 
+# Account activation hashes
 CREATE TABLE verifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     verification TEXT NOT NULL,
@@ -30,6 +33,7 @@ CREATE TABLE verifications (
     FOREIGN KEY(userId) REFERENCES users(id)
 );
 
+# Password recovery hashes
 CREATE TABLE recoveries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     recovery TEXT NOT NULL,
@@ -37,6 +41,7 @@ CREATE TABLE recoveries (
     FOREIGN KEY(userId) REFERENCES users(id)
 );
 
+# Admin credentials
 CREATE TABLE admin (
     id INTEGER PRIMARY KEY,
     password TEXT
