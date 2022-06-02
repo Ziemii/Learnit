@@ -41,9 +41,59 @@ CREATE TABLE recoveries (
     FOREIGN KEY(userId) REFERENCES users(id)
 );
 
-# Admin credentials
+# Admin
 CREATE TABLE admin (
     id INTEGER PRIMARY KEY,
     password TEXT
 );
 
+### PostgreSQL ###
+
+# Users schema
+CREATE TABLE users (                    
+    id SERIAL PRIMARY KEY,  
+    login TEXT NOT NULL UNIQUE,
+    passwordhash TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    isActive INTEGER NOT NULL,
+    voted TEXT DEFAULT 0,
+    bookmarks TEXT DEFAULT 0
+);
+
+CREATE TABLE lpaths (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    tags TEXT,
+    excerpt TEXT,
+    body TEXT,
+    rating INTEGER DEFAULT 0,
+    isActive INTEGER DEFAULT 0,
+    voted TEXT DEFAULT 0,
+    userId INTEGER,
+    FOREIGN KEY(userId) REFERENCES users(id)
+);
+
+# Account activation hashes
+CREATE TABLE verifications (
+    id SERIAL PRIMARY KEY,
+    verification TEXT NOT NULL,
+    email TEXT NOT NULL
+);
+
+# Password recovery hashes
+CREATE TABLE recoveries (
+    id SERIAL PRIMARY KEY,
+    recovery TEXT NOT NULL,
+    userId INTEGER NOT NULL UNIQUE,
+    FOREIGN KEY(userId) REFERENCES users(id)
+);
+
+# Admin
+CREATE TABLE admin (
+    id SERIAL PRIMARY KEY,
+    password TEXT
+);
+
+$$$$$$$$$TESTING%%%%%%%%%
+
+INSERT INTO users (login, passwordhash, email, isActive) VALUES (%s,%s,%s,%s);

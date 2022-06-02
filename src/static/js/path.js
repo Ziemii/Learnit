@@ -43,7 +43,7 @@ function rate() {
   xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
   xhr.send(params);
-  wait(200);
+  wait(400);
   return location.reload();
 }
 
