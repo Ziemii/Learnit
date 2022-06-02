@@ -1,5 +1,4 @@
 
-from msilib.schema import Error
 from xml.etree.ElementTree import tostring
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
@@ -10,7 +9,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
 from helpers import login_required
 import mail_service
-import json
 from flask import Response
 
 
