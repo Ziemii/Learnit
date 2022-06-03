@@ -445,8 +445,9 @@ def deleteAccount():
     with sqlite3.connect(_DB) as conn:
         if(userId != None):
             cur = conn.cursor()
-            cur.execute("DELETE FROM users WHERE id=? ;", (int(userId),))
             cur.execute("DELETE FROM lpaths WHERE userId=? ;", (int(userId),))
+            cur.execute("DELETE FROM users WHERE id=? ;", (int(userId),))
+            redirect('/')
             return Response("DELETE DONE", status=201, mimetype='application/json')
         return Response("DELETE FAILED", status=400, mimetype='application/json')
 
