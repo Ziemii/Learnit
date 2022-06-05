@@ -1,3 +1,5 @@
+### Account activation and password reset e-mail service ###
+
 import smtplib
 import ssl
 from email.mime.text import MIMEText
@@ -12,21 +14,18 @@ SMTPhost = os.getenv('HOST')
 password = os.getenv('MAILSSWORD')
 port = os.getenv('PORT')
 
-
+# Sends account activation link to provided e-mail address
 def SendConfirmation(receiver, hash):
-
     message = MIMEMultipart("alternative")
     message["Subject"] = "Account Verification"
     message["From"] = f"Learn!T <{sender_email}>"
     message["To"] = receiver
-
     text = f"""\
     Hello,
     Your activation link:
     {os.getenv('LOCALHOST')+"confirmation?pass="+hash}
     If you didn't create new account on our site, ignore that message.
     """
-
     html = f"""\
     <html>
     <head>
@@ -55,18 +54,16 @@ def SendConfirmation(receiver, hash):
     </body>
     </html>
     """
-
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
     message.attach(part1)
     message.attach(part2)
-
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(SMTPhost, port, context=context) as server:
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver, message.as_string())
 
-
+# Sends password reset link to provided e-mail address
 def SendRecovery(receiver, hash):
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset Request"
@@ -79,7 +76,6 @@ def SendRecovery(receiver, hash):
     {os.getenv('LOCALHOST')+"recover?pass="+hash}
     If you didn't request reset, ignore that message.
     """
-
     html = f"""\
     <html>
     <head>
@@ -113,7 +109,6 @@ def SendRecovery(receiver, hash):
     part2 = MIMEText(html, "html")
     message.attach(part1)
     message.attach(part2)
-
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(SMTPhost, port, context=context) as server:
         server.login(sender_email, password)

@@ -13,68 +13,79 @@ from helpers import login_required
 import mail_service
 from flask import Response
 
+# Loads .env file
 load_dotenv() 
 
+# Flask app initialization
 app = Flask(__name__)
 app.secret_key = secrets.token_urlsafe(16)
 
-
+# Flask session configuration and initialization
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+# Database address
 _DB = os.getenv('DB')
+
+# Initial state for active nav link
 active = [0, 0, 0]
 
 # Landing page
-
-
 @app.route('/', methods=['GET'])
 def index():
-    # active = [0, 1, 0]
     return redirect('/learning-paths')
 
-
+# Learning paths list route with sorting functionality and pagination
+# Sorting solution implemented as SQL queries requesting already sorted results
 @app.route('/learning-paths', methods=['GET'])
 def learningPaths():
+    # Sets learning paths nav link active
     active = [0, 1, 0]
+
+    # Reads GET request arguments
     tag = request.args.get('tag')
     page = request.args.get('page')
+    search = request.args.get('search')
+    sortBy = request.args.get('sortBy')
+
+    # If there was page argument provided, convert it to integer, else first page will be shown     
     if page:
         page = int(page)
-    search = request.args.get('search')
-
     if not page:
         page = 1
 
-    sortBy = request.args.get('sortBy')
-
+    # Limits number of learning paths shown on single page
     limit = 6
+
+    # Connects to learning paths table in database     
     with sqlite3.connect(_DB) as conn:
         cur = conn.cursor()
 
+        # Counts how many active submissions there are and calculates number of pages needed
         count = int(cur.execute(
             "SELECT COUNT(*) FROM lpaths WHERE isActive=1;").fetchall()[0][0])
-
         pages = 0
         if((count % limit) > 0):
             pages = int(count/limit)+1
         else:
             pages = int(count/limit)
 
+        # Depending on GET request composition returns requested results
+        # Results filtered by tag
         if(tag):
-
             lpaths = cur.execute(
                 "SELECT * FROM lpaths WHERE tags LIKE ? AND isActive = 1;", ("%"+tag+"%",)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, pages=0, tag=tag)
-
+        
+        # Results filtered by searched title
         if(search):
             lpaths = cur.execute(
                 "SELECT * FROM lpaths WHERE title LIKE ? AND isActive = 1 ORDER BY id DESC LIMIT ?;", ("%"+search+"%", limit,)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, tag='x')
-
+        
+        # Paged and sorted results
         if(sortBy and page):
-
             match sortBy:
                 case 'rating':
                     lpaths = cur.execute(
@@ -92,6 +103,8 @@ def learningPaths():
                     lpaths = cur.execute(
                         "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
+        
+        # Sorted results
         if(sortBy):
             match sortBy:
                 case 'rating':
@@ -110,37 +123,54 @@ def learningPaths():
                     lpaths = cur.execute(
                         "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ?;", (limit,)).fetchall()
                     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
+        
+        # Paged results
         if(page):
-
             lpaths = cur.execute(
                 "SELECT * FROM lpaths WHERE isActive=1 ORDER BY id DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages)
-
+        
+        # Default paging and sorting
         lpaths = cur.execute(
             "SELECT * FROM lpaths WHERE isActive=1 ORDER BY id DESC LIMIT ?;", (limit,)).fetchall()
-
+        
+        # Shows error page if learning paths couldn't be acquired
         if not lpaths:
             active = [0, 0, 0]
             return render_template('errorpage.html', active=active)
 
     return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages)
 
-
-@app.route('/about', methods=['GET', 'POST'])
+# About route
+@app.route('/about', methods=['GET'])
 def about():
     if(request.method == 'GET'):
         active = [0, 0, 1]
         return render_template("about.html", active=active)
 
-
+# Login functionality implementation
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     active = [0, 0, 0]
+
+    # Clears sessions, if any
     session.clear()
+
+    
+    # Default behaviour is when GET method asks for login form, 
+    # POST method triggers login action itself     
+    
+    # Check if request method is POST, else render login.html
     if request.method == 'POST':
+        
+        # Reads form inputs
         username = request.form.get('username')
         password = request.form.get('password')
         userId = None
+        
+        # Connects to database and checks if there is user as provided in form, 
+        # if password hash saved for this user checks with password provided in form
+        # and if account is active. If all is valid, user's id is saved within session and user is logged in.
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor()
             user = cur.execute(
@@ -153,26 +183,35 @@ def login():
                 return render_template('login.html', active=active, passwordError='Account inactive, check your email.')
             userId = user[0][1]
         session['user_id'] = userId
-
         return redirect("/")
-
     else:
-
         return render_template("login.html", active=active)
 
-
-@app.route('/logout', methods=['GET', 'POST'])
+#Logout functionality
+@app.route('/logout', methods=['GET'])
 def logout():
+    # Clears session and redirects to root page
     session.clear()
     return redirect('/')
 
 
+# Register functionality implementation #
+# Similar to login, default behaviour is when GET method asks for register form, 
+# POST method triggers registration action itself     
+
+# Check if request method is POST, else render register.html
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        
+        # Read from form input fields
         username = request.form.get('username')
         password = request.form.get('password')
         email = request.form.get('email')
+        
+        # Connects to database, checks if there is user or e-mail already in database
+        # if not, generates new password hash, saves credentials to database and sends activation link
+        # to provided e-mail 
         with sqlite3.connect(_DB) as conn:
             cur = conn.cursor()
             user = cur.execute(
@@ -197,19 +236,19 @@ def register():
                 return render_template('register.html', active=active, userError='Username already in use')
             else:
                 return render_template('register.html', active=active, emailError='E-mail already in use')
-
         return redirect("/")
-
-        return render_template("register.html", active=active)
     else:
         return render_template("register.html", active=active)
 
-
+# Privacy policy page
 @app.route('/privacy', methods=['GET'])
 def terms():
     return render_template('privacy.html', active=active)
 
-
+# Account activation API route #
+# activation link contains verification hash code as parameter
+# if verification hash code matches any verifications table column row in database
+# user account referenced in that row becomes active and row is deleted.
 @app.route('/confirmation', methods=['GET'])
 def confirmation():
     hashParam = request.args.get('pass')
@@ -222,7 +261,9 @@ def confirmation():
         return render_template('login.html', active=active, accActive='Account activated.')
     return render_template('errorpage.html', active=active)
 
-
+# New sumbission creating route #
+# When request method is GET renders form page with integrated text editor,
+# else saves submission in database as inactive
 @app.route('/new', methods=['GET', 'POST'])
 @login_required
 def newPath():
@@ -245,11 +286,8 @@ def newPath():
             return render_template("errorpage.html", error="Database error.")
 
         return render_template("new_path.html", active=active, success=1)
-
     else:
-
         return render_template("new_path.html", active=active)
-
 
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
