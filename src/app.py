@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
 import secrets
-from helpers import login_required
+from helpers import login_required, admin_required
 import mail_service
 from flask import Response
 
@@ -26,7 +26,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # Database address
-_DB = os.getenv('DB')
+DB = os.getenv('DB')
 
 # Initial state for active nav link
 active = [0, 0, 0]
@@ -59,7 +59,7 @@ def learningPaths():
     limit = 6
 
     # Connects to learning paths table in database     
-    with sqlite3.connect(_DB) as conn:
+    with sqlite3.connect(DB) as conn:
         cur = conn.cursor()
 
         # Counts how many active submissions there are and calculates number of pages needed
@@ -171,7 +171,7 @@ def login():
         # Connects to database and checks if there is user as provided in form, 
         # if password hash saved for this user checks with password provided in form
         # and if account is active. If all is valid, user's id is saved within session and user is logged in.
-        with sqlite3.connect(_DB) as conn:
+        with sqlite3.connect(DB) as conn:
             cur = conn.cursor()
             user = cur.execute(
                 "SELECT passwordhash, id, isActive FROM users WHERE login = ?", (username,)).fetchall()
@@ -212,7 +212,7 @@ def register():
         # Connects to database, checks if there is user or e-mail already in database
         # if not, generates new password hash, saves credentials to database and sends activation link
         # to provided e-mail 
-        with sqlite3.connect(_DB) as conn:
+        with sqlite3.connect(DB) as conn:
             cur = conn.cursor()
             user = cur.execute(
                 "SELECT * FROM users WHERE login = ?", (username,)).fetchall()
@@ -252,7 +252,7 @@ def terms():
 @app.route('/confirmation', methods=['GET'])
 def confirmation():
     hashParam = request.args.get('pass')
-    with sqlite3.connect(_DB) as conn:
+    with sqlite3.connect(DB) as conn:
         cur = conn.cursor()
         cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;", (str(
             'pbkdf2:sha256:260000'+hashParam),))
@@ -270,40 +270,56 @@ def newPath():
     active = [0, 0, 0]
 
     if request.method == 'POST':
+        
+        # Reads form arguments
         title = request.form.get('title')
         tags = request.form.get('tags')
         excerpt = request.form.get('excerpt')
         body = request.form.get('body')
+        
+        # Filters tags string from unwanted characters
         filteredTags = ''.join(
             (filter(lambda x: x not in [' ', ',', '!', '?'], tags)))
+        
+        # Reads user id from session for sumbission saving purpose
         userId = session['user_id']
+        
+        # Tries connection to database to save submission
+        # renders error page if exception raised.
         try:
-            with sqlite3.connect(_DB) as conn:
+            with sqlite3.connect(DB) as conn:
                 cur = conn.cursor()
                 cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",
                             (title, filteredTags, excerpt, body, userId))
         except Exception:
-            return render_template("errorpage.html", error="Database error.")
+            return render_template("errorpage.html", error="Database error, please try again.")
 
         return render_template("new_path.html", active=active, success=1)
     else:
         return render_template("new_path.html", active=active)
 
+# Password recovery route #
+# Makes distinction between couple POST requests types
+# If POST contain email address API sends password reset link
+# else POST request must be from new password form 
+# which is reached by opening recovery link
+# GET request renders e-mail input form
 @app.route('/recover', methods=['GET', 'POST'])
 def recover():
     if request.method == 'POST':
         if(request.form.get('email', False)):
             email = request.form.get('email')
-            success = None
             try:
-                with sqlite3.connect(_DB) as conn:
+                with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
                     userId = cur.execute(
                         "SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
                     if not userId:
                         return render_template('recover.html', active=active, error='Email not in database')
+                    # Generates recover hash code
                     recovery = str(generate_password_hash(
                         email, method='pbkdf2:sha256', salt_length=8))
+                    # Saves recover hash code in database
                     conn.execute(
                         "INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
                     mail_service.SendRecovery(email, recovery)
@@ -313,15 +329,15 @@ def recover():
 
             return render_template("recover.html", active=active, success="Request accepted, check your mail.")
         else:
+            # Reads form input fields
             userId = request.form.get('formId')
             password = request.form.get('password')
             try:
-                with sqlite3.connect(_DB) as conn:
+                with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
-
+                    # Generates new hash code from provided password and saves it in database
                     hash = generate_password_hash(
                         password, method='pbkdf2:sha256', salt_length=8)
-
                     cur.execute(
                         "UPDATE users SET passwordhash = ? WHERE id = ?;", (hash, userId))
                     return render_template("recover.html", active=active, success="Password changed")
@@ -333,7 +349,7 @@ def recover():
         recovery = request.args.get('pass', None)
         if recovery != None:
             try:
-                with sqlite3.connect(_DB) as conn:
+                with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
                     dbRecovery = cur.execute(
                         "SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
@@ -351,7 +367,9 @@ def recover():
 
     return render_template("recover.html", active=active)
 
-
+# Path presentation route #
+# Fetches learning path data from database using id
+# and renders particular path page
 @app.route('/path', methods=['GET'])
 def path():
     pathId = request.args.get('id')
@@ -360,7 +378,7 @@ def path():
     userId = None
     voted = None
     userId = session.get('user_id')
-    with sqlite3.connect(_DB) as conn:
+    with sqlite3.connect(DB) as conn:
         cur = conn.cursor()
         if(userId != None):
             voted = cur.execute(
@@ -376,17 +394,19 @@ def path():
         lpath = cur.execute(
             "SELECT * FROM lpaths WHERE id = ?", (pathId,)).fetchall()[0]
         if not lpath:
+            # Redirects to app root if there is no path with requested id
             return redirect('/')
 
     return render_template("path.html", active=active, lpath=lpath, userId=userId, voted=voted, bookmark=bookmark)
 
-
+# Rating endpoint #
+# Updates endorsements count adding 1 and saves which users already voted
 @app.route('/rate', methods=['POST'])
 @login_required
 def rate():
     pathId = request.form.get('pathId')
-    userId = request.form.get('userId')
-    with sqlite3.connect(_DB) as conn:
+    userId = session['user_id']
+    with sqlite3.connect(DB) as conn:
         if(userId != None and pathId != None):
             cur = conn.cursor()
             voted = cur.execute(
@@ -410,13 +430,14 @@ def rate():
             return Response("RATED", status=201, mimetype='application/json')
         return Response("NOT RATED", status=400, mimetype='application/json')
 
-
+# Bookmarking endpoint #
+# Adds to or deletes from account bookmarks tab
 @app.route('/bookmark', methods=['POST'])
 @login_required
 def bookmark():
     pathId = request.form.get('pathId')
-    userId = request.form.get('userId')
-    with sqlite3.connect(_DB) as conn:
+    userId = session['user_id']    
+    with sqlite3.connect(DB) as conn:
         if(userId != None and pathId != None):
             cur = conn.cursor()
             bookmarks = cur.execute(
@@ -435,17 +456,19 @@ def bookmark():
                 cur.execute(
                     "UPDATE users SET bookmarks = ? WHERE id = ?", (bookmarks, userId))
 
-            return Response("BOOKMARKING DONE", status=201, mimetype='application/json')
+            return Response("BOOKMARKING DONE", status=200, mimetype='application/json')
         return Response("BOOKMARKING FAILED", status=400, mimetype='application/json')
 
-
-@app.route('/account', methods=['GET', 'POST'])
+# Account page # 
+# Fetches database for user bookmars, submissions and account information 
+# then renders account page
+@app.route('/account', methods=['GET'])
 @login_required
 def account():
     userId = session['user_id']
     bookmarks = []
     if(userId):
-        with sqlite3.connect(_DB) as conn:
+        with sqlite3.connect(DB) as conn:
             cur = conn.cursor()
             user = cur.execute(
                 "SELECT * FROM users WHERE id = ?", (int(userId),)).fetchall()[0]
@@ -461,64 +484,43 @@ def account():
                 "SELECT * FROM lpaths WHERE userId = ?;", (int(userId),)).fetchall()
     return render_template('account.html', active=active, bookmarks=bookmarks, submissions=submissions, userId=userId, user=user)
 
-
+# Submission deletion #
+# Endpoint for submission deletion
+# Submission id is supplied with POST request and then row containing that id is removed from table
 @app.route('/delete', methods=['POST'])
 @login_required
 def delete():
-
     pathId = request.form.get('pathId')
-    with sqlite3.connect(_DB) as conn:
+    with sqlite3.connect(DB) as conn:
         if(pathId != None):
             cur = conn.cursor()
             cur.execute("DELETE FROM lpaths WHERE id=? ;", (int(pathId),))
-            return Response("DELETE DONE", status=201, mimetype='application/json')
+            return Response("DELETE DONE", status=200, mimetype='application/json')
         return Response("DELETE FAILED", status=400, mimetype='application/json')
 
-
+# Account deletion endpoint #
+# Accepts request to delete account
+# Deletes all submissions created on this account
 @app.route('/deleteAccount', methods=['POST'])
 @login_required
 def deleteAccount():
 
     userId = request.get_json()
-    with sqlite3.connect(_DB) as conn:
+    with sqlite3.connect(DB) as conn:
         if(userId != None):
             cur = conn.cursor()
             cur.execute("DELETE FROM lpaths WHERE userId=? ;", (int(userId),))
             cur.execute("DELETE FROM users WHERE id=? ;", (int(userId),))
             redirect('/')
-            return Response("DELETE DONE", status=201, mimetype='application/json')
+            return Response("DELETE DONE", status=200, mimetype='application/json')
         return Response("DELETE FAILED", status=400, mimetype='application/json')
 
 
-@app.route('/controlpanel', methods=['GET', 'POST'])
-def controlPanel():
-    active = [0, 0, 0]
-    if request.method == 'POST':
-        password = request.form.get('password')
-        with sqlite3.connect(_DB) as conn:
-            cur = conn.cursor()
-            password = cur.execute(
-                "SELECT password FROM admin WHERE id = 1").fetchall()[0][0]
-            if not password:
-                return redirect('/')
-            if password != password:
-                return redirect('/')
-            evals = cur.execute(
-                "SELECT * FROM lpaths WHERE isActive = 0").fetchall()
-            submissions = cur.execute(
-                "SELECT * FROM lpaths WHERE isActive = 1").fetchall()
-            if not evals:
-                evals = None
-
-            if not submissions:
-                submissions = None
-
-        return render_template("controlpanel.html", active=active, admin=1, evals=evals, submissions=submissions)
-    else:
-
-        return render_template("controlpanel.html", active=active)
-
-
+# Changing password #
+# Password change service implementation
+# on GET request renders password change form
+# on form submission connects to database and compares password hash with provided account password
+# if both match generates new password hash from password provided in form and saves it in database
 @app.route('/changepassword', methods=['GET', 'POST'])
 @login_required
 def changePassword():
@@ -528,15 +530,13 @@ def changePassword():
         old = request.form.get('old')
         password = request.form.get('password')
         try:
-            with sqlite3.connect(_DB) as conn:
+            with sqlite3.connect(DB) as conn:
                 cur = conn.cursor()
                 passwordHash = cur.execute(
                     "SELECT passwordhash FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
                 if passwordHash != None:
-                    hash = generate_password_hash(
-                        old, method='pbkdf2:sha256', salt_length=8)
                     if check_password_hash(passwordHash, old):
-                        newHash = hash = generate_password_hash(
+                        newHash = generate_password_hash(
                             password, method='pbkdf2:sha256', salt_length=8)
                         cur.execute(
                             "UPDATE users SET passwordhash = ? WHERE id = ?;", (newHash, userId))
@@ -550,13 +550,48 @@ def changePassword():
         return render_template("changepassword.html", active=active)
 
 
+# Submissions control panel #
+# on GET request renders login screen with single input
+# after logging in renders list of inactive submissions
+
+@app.route('/controlpanel', methods=['GET', 'POST'])
+def controlPanel():
+    active = [0, 0, 0]
+    if request.method == 'POST':
+        password = request.form.get('password')
+        with sqlite3.connect(DB) as conn:
+            cur = conn.cursor()
+            password = cur.execute(
+                "SELECT password FROM admin WHERE id = 1").fetchall()[0][0]
+            if not password:
+                return redirect('/')
+            if password != password:
+                return redirect('/')
+            session['admin_id'] = 1
+            evals = cur.execute(
+                "SELECT * FROM lpaths WHERE isActive = 0").fetchall()
+            if not evals:
+                evals = None
+
+
+        return render_template("controlpanel.html", active=active, admin=1, evals=evals)
+    else:
+
+        return render_template("controlpanel.html", active=active)
+
+
+# Submission activation or rejection #
+# complementary endpoint for accepting or rejecting submission
+# buttons in control panel triggers POST request with positive or negative decision
+# if positive, submission is activated and can be seen on learning paths page
+# if negative, submission is deleted from database 
 @app.route('/verdict', methods=['POST'])
-@login_required
+@admin_required
 def verdict():
     id = request.form.get('pathId')
     verdict = request.form.get('verdict')
     try:
-        with sqlite3.connect(_DB) as conn:
+        with sqlite3.connect(DB) as conn:
             cur = conn.cursor()
             if (verdict):
                 cur.execute(

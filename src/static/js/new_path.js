@@ -1,5 +1,5 @@
 
-// New path creator text editor initialization parameters
+// New path text editor initialization parameters
 $(document).ready(function() {
     $('#summernote').summernote({
         height: 400,

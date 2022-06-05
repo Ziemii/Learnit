@@ -40,6 +40,8 @@ function removeSubmission(pathId){
      
     
 }
+
+// Sends API request to delete account 
 function deleteAccount(userId){
     
         const url = "./deleteAccount";
@@ -60,6 +62,8 @@ function deleteAccount(userId){
                 });
             
 }
+
+// Buttons tooltip initialization
 $(function () {
   $('[data-toggle="tooltip"]').tooltip({ placement: "right" });
 });
