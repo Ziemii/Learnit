@@ -1,3 +1,6 @@
+// JavaScript code for account page
+
+// Delaying mchanism
 var wait = (ms) => {
     const start = Date.now();
     let now = start;
@@ -5,6 +8,8 @@ var wait = (ms) => {
       now = Date.now();
     }
 }
+
+//Sends API request to remove bookmark from database
 function removeBookmark(pathId){
     var url = "/bookmark";
     var params = "userId="+$('#pathData').data('userid')+"&pathId="+pathId;
@@ -18,8 +23,9 @@ function removeBookmark(pathId){
     wait(200);
     return location.reload();
 }
+
+//Sends API request to remove submission from database
 function removeSubmission(pathId){
-   
         var url = "/delete";
         var params = "pathId="+pathId;
         console.log(params)

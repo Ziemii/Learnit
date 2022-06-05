@@ -1,7 +1,7 @@
+// JavaScript support code for learning paths list page
 
-    
+// Transforms tags from pure string to interactive buttons
 let cardsTags = document.getElementsByName('tags');
-
 cardsTags.forEach(rawTag => {
     let tags = rawTag.innerHTML.split('#');
     rawTag.innerHTML='';
@@ -14,12 +14,11 @@ cardsTags.forEach(rawTag => {
             var inside = document.createTextNode('#'+element);
             button.appendChild(inside);
             hyperlink.appendChild(button);
-            
             rawTag.appendChild(hyperlink);
         })
 })
 
-
+// Redirects to application endpoint with submissions sorted by rating
 function byRating(){
     var ratingOrder = sessionStorage.getItem('ratingOrder');
     if(ratingOrder){
@@ -36,6 +35,7 @@ function byRating(){
     }
 }
 
+// Redirects to application endpoint with submissions sorted in alphabetical order
 function byAlpha(){
     var alphaOrder = sessionStorage.getItem('alphaOrder');
     if(alphaOrder){
@@ -54,13 +54,14 @@ function byAlpha(){
 
 }
 
+// Searching by title 
 function Search(){
     searchWord = document.getElementById('search').value;
-    console.log(document.getElementById('search').value);
     window.location.href = '/learning-paths?search=' + searchWord;
 
 }
 
+// Changes sort buttons appearance depending on order of sort
 const url = new URL(window.location);
 const sort = url.searchParams.get('sortBy');
 switch(sort){

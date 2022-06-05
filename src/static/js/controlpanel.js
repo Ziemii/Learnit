@@ -1,3 +1,6 @@
+// Adding simple functionality to control panel
+
+// Sends API request with information if submission was accepted or rejected
 function verdict(verdict, id) {
     var url = "/verdict";
     var params =

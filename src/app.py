@@ -1,5 +1,7 @@
 
-from xml.etree.ElementTree import tostring
+### Main flask application ###
+
+# Import section
 from flask import Flask, render_template, request, session, redirect, flash
 from flask_session import Session
 import os
@@ -11,12 +13,10 @@ from helpers import login_required
 import mail_service
 from flask import Response
 
-
-load_dotenv()
-
+load_dotenv() 
 
 app = Flask(__name__)
-app.secret_key = secrets.token_urlsafe(16)  # to change
+app.secret_key = secrets.token_urlsafe(16)
 
 
 app.config["SESSION_PERMANENT"] = False

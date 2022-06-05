@@ -1,3 +1,5 @@
+// Client-side input form fields validation
+
 let email = document.getElementById("email");
 
 //Regular expression for email check

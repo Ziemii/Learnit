@@ -1,3 +1,6 @@
+// JavaScript adding functionality to learning path page
+
+// Delay mechanism
 var wait = (ms) => {
   const start = Date.now();
   let now = start;
@@ -5,6 +8,8 @@ var wait = (ms) => {
     now = Date.now();
   }
 };
+
+// Transforms tags from pure string to interactive buttons
 let cardsTags = document.getElementsByName("tags");
 
 cardsTags.forEach((rawTag) => {
@@ -26,10 +31,12 @@ cardsTags.forEach((rawTag) => {
   });
 });
 
+// Endorse and bookmark buttons tooltip initialization
 $(function () {
   $('[data-toggle="tooltip"]').tooltip({ placement: "right" });
 });
 
+// Sends API request to save endorsement in database
 function rate() {
   var url = "/rate";
   var params =
@@ -47,6 +54,7 @@ function rate() {
   return location.reload();
 }
 
+// Sends API request to save bookmark in user's bookmarks
 function bookmark() {
   var url = "/bookmark";
   var params =

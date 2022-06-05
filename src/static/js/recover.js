@@ -1,3 +1,5 @@
+// Password recovery page JavaScript
+
 // Password field length check
 document.getElementById("password").addEventListener("keyup", function () {
     if (document.getElementById("password").value.length < 4) {

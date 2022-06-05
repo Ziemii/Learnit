@@ -1,3 +1,5 @@
+// JavaScript for client-side input fields validation
+
 // Password field length check
 document.getElementById("password").addEventListener("keyup", function () {
   if (document.getElementById("password").value.length < 4) {
