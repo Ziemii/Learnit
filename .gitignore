@@ -1,4 +1,2 @@
-venv/
-IDEAS.*
-# .env
 flask_session
+/venv
