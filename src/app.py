@@ -405,7 +405,7 @@ def path():
 @login_required
 def rate():
     pathId = request.form.get('pathId')
-    userId = session['user_id']
+    userId = str(session['user_id'])
     with sqlite3.connect(DB) as conn:
         if(userId != None and pathId != None):
             cur = conn.cursor()
@@ -476,10 +476,11 @@ def account():
                 "SELECT bookmarks FROM users WHERE id = ?", (int(userId),)).fetchall()[0][0]
             bookmarksId = bookmarksId.split(',')
             for pathId in bookmarksId:
-                bookmarks.append(cur.execute(
-                    "SELECT * FROM lpaths WHERE id = ?", (int(pathId),)).fetchall())
-            bookmarks.pop(0)
-
+                bookmark = cur.execute(
+                    "SELECT * FROM lpaths WHERE id = ?", (int(pathId),)).fetchall()
+                print(f"bookmark {bookmark} ")
+                if(bookmark != []):
+                    bookmarks.append(bookmark)
             submissions = cur.execute(
                 "SELECT * FROM lpaths WHERE userId = ?;", (int(userId),)).fetchall()
     return render_template('account.html', active=active, bookmarks=bookmarks, submissions=submissions, userId=userId, user=user)
@@ -589,11 +590,11 @@ def controlPanel():
 @admin_required
 def verdict():
     id = request.form.get('pathId')
-    verdict = request.form.get('verdict')
+    verdict = str(request.form.get('verdict'))
     try:
         with sqlite3.connect(DB) as conn:
             cur = conn.cursor()
-            if (verdict):
+            if (verdict == '1'):
                 cur.execute(
                     "UPDATE lpaths SET isActive = 1 WHERE id = ?;", (id,))
             else:
