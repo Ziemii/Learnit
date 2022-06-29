@@ -84,51 +84,27 @@ def learningPaths():
                 "SELECT * FROM lpaths WHERE title LIKE ? AND isActive = 1 ORDER BY id DESC LIMIT ?;", ("%"+search+"%", limit,)).fetchall()
             return render_template("learning-paths.html", active=active, paths=lpaths, tag='x')
         
-        # Paged and sorted results
-        if(sortBy and page):
-            match sortBy:
-                case 'rating':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case 'alpha':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case '!rating':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case '!alpha':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
         
         # Sorted results
         if(sortBy):
-            match sortBy:
-                case 'rating':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating LIMIT ?;", (limit,)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case 'alpha':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title LIMIT ?;", (limit,)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case '!rating':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY rating DESC LIMIT ?;", (limit,)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-                case '!alpha':
-                    lpaths = cur.execute(
-                        "SELECT * FROM lpaths WHERE isActive=1 ORDER BY title DESC LIMIT ?;", (limit,)).fetchall()
-                    return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
-        
-        # Paged results
-        if(page):
-            lpaths = cur.execute(
-                "SELECT * FROM lpaths WHERE isActive=1 ORDER BY id DESC LIMIT ? OFFSET ?;", (limit, (page-1)*limit)).fetchall()
-            return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages)
+
+            if(sortBy[0] == "!"):
+                order = "DESC"
+                if(sortBy[1] == "a"):
+                    orderBy = "title"
+                else:
+                    orderBy = "rating"
+            else:
+                order = "ASC"
+                if(sortBy[0] == "a"):
+                    orderBy = "title"
+                else:
+                    orderBy = "rating"
+            
+            # Construct database query for sorted and paged results depending on GET request parameters
+            lpaths = cur.execute(f"SELECT * FROM lpaths WHERE isActive=1 ORDER BY {orderBy} {order} LIMIT ? OFFSET ?;", (limit, (page-1)*limit if page else "0")).fetchall()
+            return render_template("learning-paths.html", active=active, paths=lpaths, pages=pages, sortBy=sortBy)
+
         
         # Default paging and sorting
         lpaths = cur.execute(
@@ -219,16 +195,11 @@ def register():
             dbemail = cur.execute(
                 "SELECT * FROM users WHERE email = ?", (email,)).fetchall()
             if not dbemail and not user:
-                hash = generate_password_hash(
-                    password, method='pbkdf2:sha256', salt_length=8)
-                cur.execute("INSERT INTO users (login, passwordhash, email, isActive) VALUES (?,?,?,?)", (str(
-                    username), str(hash), str(email), 0))
-                userId = cur.execute(
-                    "SELECT id FROM users WHERE login = ?", (username,)).fetchall()[0][0]
-                verification = str(generate_password_hash(
-                    username, method='pbkdf2:sha256', salt_length=8))
-                cur.execute(
-                    "INSERT INTO verifications (verification, userId) VALUES (?,?)", (verification, userId))
+                hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+                cur.execute("INSERT INTO users (login, passwordhash, email, isActive) VALUES (?,?,?,?)", (str(username), str(hash), str(email), 0))
+                userId = cur.execute("SELECT id FROM users WHERE login = ?", (username,)).fetchall()[0][0]
+                verification = str(generate_password_hash(username, method='pbkdf2:sha256', salt_length=8))
+                cur.execute( "INSERT INTO verifications (verification, userId) VALUES (?,?)", (verification, userId))
                 mail_service.SendConfirmation(
                     email, verification.lstrip("pbkdf2:sha256:260000"))
                 return render_template('register_success.html', active=active)
@@ -256,8 +227,7 @@ def confirmation():
         cur = conn.cursor()
         cur.execute("UPDATE users SET isActive = 1 FROM (SELECT userId from verifications WHERE verification = ?) as verifications WHERE users.id = verifications.userId;", (str(
             'pbkdf2:sha256:260000'+hashParam),))
-        cur.execute("DELETE from verifications WHERE verification = ?;",
-                    (str('pbkdf2:sha256:260000'+hashParam),))
+        cur.execute("DELETE from verifications WHERE verification = ?;",(str('pbkdf2:sha256:260000'+hashParam),))
         return render_template('login.html', active=active, accActive='Account activated.')
     return render_template('errorpage.html', active=active)
 
@@ -289,8 +259,7 @@ def newPath():
         try:
             with sqlite3.connect(DB) as conn:
                 cur = conn.cursor()
-                cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",
-                            (title, filteredTags, excerpt, body, userId))
+                cur.execute("INSERT INTO lpaths (title, tags, excerpt, body, userId) VALUES (?,?,?,?,?)",(title, filteredTags, excerpt, body, userId))
         except Exception:
             return render_template("errorpage.html", error="Database error, please try again.")
 
@@ -312,16 +281,13 @@ def recover():
             try:
                 with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
-                    userId = cur.execute(
-                        "SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
+                    userId = cur.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchall()[0][0]
                     if not userId:
                         return render_template('recover.html', active=active, error='Email not in database')
                     # Generates recover hash code
-                    recovery = str(generate_password_hash(
-                        email, method='pbkdf2:sha256', salt_length=8))
+                    recovery = str(generate_password_hash( email, method='pbkdf2:sha256', salt_length=8))
                     # Saves recover hash code in database
-                    conn.execute(
-                        "INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
+                    conn.execute("INSERT INTO recoveries (recovery, userId) VALUES (?,?)", (recovery, userId))
                     mail_service.SendRecovery(email, recovery)
             except Exception as error:
                 print(error)
@@ -336,10 +302,8 @@ def recover():
                 with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
                     # Generates new hash code from provided password and saves it in database
-                    hash = generate_password_hash(
-                        password, method='pbkdf2:sha256', salt_length=8)
-                    cur.execute(
-                        "UPDATE users SET passwordhash = ? WHERE id = ?;", (hash, userId))
+                    hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+                    cur.execute("UPDATE users SET passwordhash = ? WHERE id = ?;", (hash, userId))
                     return render_template("recover.html", active=active, success="Password changed")
 
             except Exception as error:
@@ -351,15 +315,12 @@ def recover():
             try:
                 with sqlite3.connect(DB) as conn:
                     cur = conn.cursor()
-                    dbRecovery = cur.execute(
-                        "SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
+                    dbRecovery = cur.execute( "SELECT COUNT(recovery) FROM recoveries WHERE recovery LIKE ?;", (recovery,)).fetchall()[0][0]
                     if int(dbRecovery) != 1:
                         return render_template('recover.html', active=active, error='Error occurred, please contact owner.')
                     else:
-                        formId = cur.execute(
-                            "SELECT users.id FROM users JOIN recoveries ON recoveries.userId = users.id WHERE recovery = ?;", (recovery,)).fetchall()[0][0]
-                        cur.execute(
-                            "DELETE from recoveries WHERE recovery = ?;", (recovery,))
+                        formId = cur.execute("SELECT users.id FROM users JOIN recoveries ON recoveries.userId = users.id WHERE recovery = ?;", (recovery,)).fetchall()[0][0]
+                        cur.execute("DELETE from recoveries WHERE recovery = ?;", (recovery,))
                         return render_template("recover.html", active=active, form=formId)
             except Exception as error:
                 print(f"Exception: {error}")
